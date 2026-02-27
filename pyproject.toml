@@ -5,6 +5,12 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "fastapi>=0.129.0",
+    "httpx>=0.28.1",
+    "pydantic[email]>=2.12.5",
+    "pytest>=9.0.2",
+    "sqlalchemy>=2.0.46",
+    "sqlalchemy-cloudflare-d1>=0.3.8",
     "webtypy>=0.1.7",
 ]
 
