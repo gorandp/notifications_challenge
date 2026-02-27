@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, UTC
 
-from sqlalchemy import Integer, String, Text, DateTime, ForeignKey
+from sqlalchemy import Integer, String, Text, DateTime, ForeignKey, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase, relationship
 
 
@@ -16,12 +16,13 @@ class User(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     email: Mapped[str] = mapped_column(String(128), unique=True, index=True)
     password_hash: Mapped[str] = mapped_column(String(64)) # SHA-256 hash
+    enabled: Mapped[bool] = mapped_column(Boolean)
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
         default=lambda: datetime.now(UTC),
     )
 
-    channels: Mapped[list[Notification]] = relationship(
+    channels: Mapped[list[Channel]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
     )
