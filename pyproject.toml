@@ -7,8 +7,9 @@ requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.129.0",
     "httpx>=0.28.1",
-    "pydantic[email]>=2.12.5",
+    "pyjwt>=2.11.0",
     "pytest>=9.0.2",
+    "pytest-asyncio>=1.3.0",
     "sqlalchemy>=2.0.46",
     "sqlalchemy-cloudflare-d1>=0.3.8",
     "webtypy>=0.1.7",
