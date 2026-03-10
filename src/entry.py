@@ -4,11 +4,11 @@ from sqlalchemy.orm import sessionmaker
 from datetime import datetime, UTC
 # from urllib.parse import urlparse
 
-from app.logger import LogWrapper, LoggerConfig
-from app.config import JWTConfig
-from app.database_models import Base as DatabaseBaseModel
-from app.fastapi_app.main import app as fastapi_app
-from app.fastapi_app.database import db_session
+from app.core.logger import LogWrapper, LoggerConfig
+from app.external.fastapi_app.config import JWTConfig
+from app.external.database.database_models import Base as DatabaseBaseModel
+from app.external.fastapi_app.main import app as fastapi_app
+from app.external.fastapi_app.database import db_session
 
 
 class EntryLogger(LogWrapper):
