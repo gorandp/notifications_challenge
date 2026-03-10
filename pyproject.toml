@@ -16,7 +16,8 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = [
-    "workers-py",
-    "workers-runtime-sdk",
-]
+dev = ["workers-py", "workers-runtime-sdk"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

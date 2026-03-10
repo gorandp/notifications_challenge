@@ -3,9 +3,10 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from src.app.external.fastapi_app.main import app
-from src.app.external.fastapi_app.database import db_session
-from src.app.external.database.database_models import Base as DatabaseBaseModel
+from app.external.database.database_models import Base as DatabaseBaseModel
+from app.external.fastapi_app.main import app
+from app.external.fastapi_app.database import db_session
+from app.external.fastapi_app.config import JWTConfig
 
 
 @pytest.fixture
@@ -25,6 +26,7 @@ def client():
     SessionLocal = sessionmaker(bind=engine)
     session = SessionLocal()
     db_session.set(session)
+    JWTConfig.set_secret("secret123456789012345678901234567890")
     return TestClient(app)
 
 
