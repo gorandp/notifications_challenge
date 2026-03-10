@@ -16,9 +16,12 @@
 	// "vars": {  "MY_VARIABLE": "production_value" }
 	"d1_databases": [
 		{
-		"binding": "DB",
-		"database_name": "portfolio_notification_challenge",
-		"database_id": "918333f3-8a73-47e0-8bf4-92deb86ba951"
+			"binding": "DB",
+			"database_name": "portfolio_notification_challenge",
+			"database_id": "918333f3-8a73-47e0-8bf4-92deb86ba951"
 		}
 	],
+	"vars": {
+		"LOGGER_LEVEL": "INFO"
+	}
 }

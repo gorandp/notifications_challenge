@@ -1,26 +1,20 @@
 from workers import WorkerEntrypoint, Request
 from sqlalchemy_cloudflare_d1 import create_engine_from_binding  # type: ignore
 from sqlalchemy.orm import sessionmaker
-from datetime import datetime, UTC
 # from urllib.parse import urlparse
 
-from app.core.logger import LogWrapper, LoggerConfig
+from app.core.logger import LoggerConfig
 from app.external.fastapi_app.config import JWTConfig
 from app.external.database.database_models import Base as DatabaseBaseModel
 from app.external.fastapi_app.main import app as fastapi_app
 from app.external.fastapi_app.database import db_session
 
 
-class EntryLogger(LogWrapper):
-    pass
-
-
 class Default(WorkerEntrypoint):
     def __init__(self, ctx, env):
         super().__init__(ctx, env)
-        # LoggerConfig.set_level(self.env.LOGGER_LEVEL)
+        LoggerConfig.set_level(self.env.LOGGER_LEVEL)
         JWTConfig.set_secret(self.env.JWT_SECRET)
-        self.logger = EntryLogger().logger
         engine = create_engine_from_binding(self.env.DB)
         self.SessionLocal = sessionmaker(bind=engine)
         DatabaseBaseModel.metadata.create_all(bind=engine)  # Create tables if not exist
