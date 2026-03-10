@@ -13,11 +13,11 @@ import jwt
 from jwt.exceptions import InvalidTokenError
 
 # # from database_models import Base as DbBase
-from app.external.database import database_models as models
 from app.core.logger import LogWrapper
+from app.external.database.main import get_db
+from app.external.database import database_models as models
 from . import schemas
 from .config import JWTConfig
-from .database import get_db
 
 
 def create_access_token(data: dict):

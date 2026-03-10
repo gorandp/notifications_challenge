@@ -3,8 +3,8 @@
 # Authorization in endpoints
 import hashlib
 
+from app.external.database.main import db_session
 from app.external.database import database_models as models
-from app.external.fastapi_app.database import db_session
 
 
 def _create_test_user() -> tuple[models.User, str]:
