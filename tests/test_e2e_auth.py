@@ -1,10 +1,11 @@
 # Register
 # Login
 # Authorization in endpoints
-import hashlib
+from fastapi import status
 
 from app.external.database.main import db_session
 from app.external.database import database_models as models
+from app.external.fastapi_app.auth import hash_password
 
 
 def _create_test_user() -> tuple[models.User, str]:
@@ -15,7 +16,7 @@ def _create_test_user() -> tuple[models.User, str]:
     """
     db = db_session.get()
     pwd = "password123"
-    password_hash = hashlib.sha256(pwd.encode("utf-8")).hexdigest()
+    password_hash = hash_password(pwd)
     new_user = models.User(
         email="test@example.com",
         password_hash=password_hash,
@@ -35,28 +36,40 @@ def test_unauthenticated(client):
 def test_login(client):
     u, pwd = _create_test_user()
     r = client.post(
-        "/login",
-        json={
-            "email": u.email,
+        "/token",
+        data={
+            "username": u.email,
+            "password": "pwd",  # Wrong password
+        },
+    )
+    assert r.status_code == status.HTTP_400_BAD_REQUEST
+
+    r = client.post(
+        "/token",
+        data={
+            "username": u.email,
             "password": pwd,
         },
     )
-    assert r.status_code == 200
+    assert r.status_code == status.HTTP_200_OK
     assert "access_token" in r.json()
 
 
 def test_authenticated_endpoint(client):
     u, pwd = _create_test_user()
     r = client.post(
-        "/login",
-        json={
-            "email": u.email,
+        "/token",
+        data={
+            "username": u.email,
             "password": pwd,
         },
     )
-    assert r.status_code == 200
+    assert r.status_code == status.HTTP_200_OK
     assert "access_token" in r.json()
     token = r.json()["access_token"]
-    r = client.get("/testAuth", headers={"Authorization": f"Bearer {token}"})
+    r = client.get(
+        "/testAuth",
+        headers={"Authorization": f"Bearer {token}"},
+    )
     assert r.status_code == 200
     assert r.json() == {"success": True}
