@@ -15,7 +15,7 @@ def _create_test_user() -> tuple[models.User, str]:
         tuple[models.User, str]: Returns the user and original password
     """
     db = db_session.get()
-    pwd = "password123"
+    pwd = "Password123!"
     password_hash = hash_password(pwd)
     new_user = models.User(
         email="test@example.com",
@@ -30,7 +30,7 @@ def _create_test_user() -> tuple[models.User, str]:
 
 def test_unauthenticated(client):
     r = client.get("/testAuth")
-    assert r.status_code == 401
+    assert r.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 def test_login(client):
@@ -71,5 +71,7 @@ def test_authenticated_endpoint(client):
         "/testAuth",
         headers={"Authorization": f"Bearer {token}"},
     )
-    assert r.status_code == 200
-    assert r.json() == {"success": True}
+    assert r.status_code == status.HTTP_200_OK
+    data = r.json()
+    assert "success" in data and data["success"] is True
+    assert "current_user_id" in data and data["current_user_id"] == u.id

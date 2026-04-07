@@ -26,6 +26,7 @@ from .auth import (
     create_access_token,
     verify_access_token,
 )
+from .auth_dep import CurrentUser
 
 
 app = FastAPI()
@@ -125,7 +126,10 @@ async def get_current_user(
     "/testAuth",
     response_model=schemas.AuthTestResponse,
 )
-async def test_authentication():
+async def test_authentication(
+    current_user: CurrentUser,
+):
     return {
+        "current_user_id": current_user.id,
         "success": True,
     }

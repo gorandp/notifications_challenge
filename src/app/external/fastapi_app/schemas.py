@@ -12,6 +12,7 @@ class AuthRequest(BaseModel):
     password: str = Field(max_length=256)
 
 class AuthTestResponse(BaseModel):
+    current_user_id: int = Field()
     success: bool = Field(default=False)
 
 class UserBase(BaseModel):
