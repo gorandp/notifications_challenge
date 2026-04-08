@@ -1,5 +1,5 @@
 from workers import WorkerEntrypoint, Request
-from sqlalchemy_cloudflare_d1 import create_engine_from_binding  # type: ignore
+from sqlalchemy_cloudflare_d1 import create_engine_from_binding
 from sqlalchemy.orm import sessionmaker
 # from urllib.parse import urlparse
 
