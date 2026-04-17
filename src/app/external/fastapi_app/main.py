@@ -61,8 +61,8 @@ async def login(
     # Look up user by email (case-insensitive)
     # Note: OAuth2PasswordRequestForm uses "username" field, but we treat it as email
     result = db.execute(
-        select(models.User).where(
-            func.lower(models.User.email) == username.lower(),
+        select(models.UserModel).where(
+            func.lower(models.UserModel.email) == username.lower(),
         )
     )
     user = result.scalars().first()

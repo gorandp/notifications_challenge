@@ -12,7 +12,7 @@ from .auth import oauth2_scheme, verify_access_token
 async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
     db: Annotated[Session, Depends(get_db)],
-) -> models.User:
+) -> models.UserModel:
     user_id = verify_access_token(token)
     if user_id is None:
         raise HTTPException(
@@ -31,8 +31,8 @@ async def get_current_user(
         )
 
     result = db.execute(
-        select(models.User).where(
-            models.User.id == user_id_int,
+        select(models.UserModel).where(
+            models.UserModel.id == user_id_int,
         )
     )
     user = result.scalars().first()
@@ -45,4 +45,4 @@ async def get_current_user(
     return user
 
 
-CurrentUser = Annotated[models.User, Depends(get_current_user)]
+CurrentUser = Annotated[models.UserModel, Depends(get_current_user)]

@@ -10,29 +10,29 @@ class Base(DeclarativeBase):
     pass
 
 
-class User(Base):
+class UserModel(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     email: Mapped[str] = mapped_column(String(128), unique=True, index=True)
-    password_hash: Mapped[str] = mapped_column(String(64)) # SHA-256 hash
+    password_hash: Mapped[str] = mapped_column(String(64))  # SHA-256 hash
     enabled: Mapped[bool] = mapped_column(Boolean)
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
         default=lambda: datetime.now(UTC),
     )
 
-    channels: Mapped[list[Channel]] = relationship(
+    channels: Mapped[list[ChannelModel]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
     )
-    notifications: Mapped[list[Notification]] = relationship(
+    notifications: Mapped[list[NotificationModel]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
     )
 
 
-class Channel(Base):
+class ChannelModel(Base):
     __tablename__ = "channels"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
@@ -41,16 +41,16 @@ class Channel(Base):
         nullable=False,
         index=True,
     )
-    type: Mapped[str] = mapped_column(String(16)) # sms, email, push
+    type: Mapped[str] = mapped_column(String(16))  # sms, email, push
     credential_user: Mapped[str] = mapped_column(String(128))
     credential_pass: Mapped[str] = mapped_column(String(128))
     resource_url: Mapped[str] = mapped_column(String(128))
     port_url: Mapped[int] = mapped_column(Integer)
 
-    user: Mapped[User] = relationship(back_populates="channels")
+    user: Mapped[UserModel] = relationship(back_populates="channels")
 
 
-class Notification(Base):
+class NotificationModel(Base):
     __tablename__ = "notifications"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
@@ -72,4 +72,4 @@ class Notification(Base):
         default=lambda: datetime.now(UTC),
     )
 
-    user: Mapped[User] = relationship(back_populates="notifications")
+    user: Mapped[UserModel] = relationship(back_populates="notifications")

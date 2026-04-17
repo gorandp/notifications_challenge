@@ -8,7 +8,7 @@ from app.external.database import database_models as models
 from app.external.fastapi_app.auth import hash_password
 
 
-def _create_test_user() -> tuple[models.User, str]:
+def _create_test_user() -> tuple[models.UserModel, str]:
     """Create a test user
 
     Returns:
@@ -17,7 +17,7 @@ def _create_test_user() -> tuple[models.User, str]:
     db = db_session.get()
     pwd = "Password123!"
     password_hash = hash_password(pwd)
-    new_user = models.User(
+    new_user = models.UserModel(
         email="test@example.com",
         password_hash=password_hash,
         enabled=True,
