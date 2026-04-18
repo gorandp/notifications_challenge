@@ -15,7 +15,7 @@ from sqlalchemy import func, select
 
 # # from database_models import Base as DbBase
 from app.core.logger import LogWrapper
-from app.external.database.main import get_db
+from app.external.fastapi_app.context import get_session, database_ctx
 from app.external.database import database_models as models
 from . import schemas
 from .config import JWTConfig
@@ -47,7 +47,7 @@ async def login(
     ## in Cloudflare Workers
     # form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     request: Request,
-    db: Annotated[Session, Depends(get_db)],
+    db: Annotated[Session, Depends(get_session)],
 ):
     form_data = await request.form()
     username = form_data.get("username")

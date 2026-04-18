@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.external.database.main import db_session
+from app.external.fastapi_app.context import db_session
 from app.external.database.database_models import Base as DatabaseBaseModel
 from app.external.fastapi_app.main import app
 from app.external.fastapi_app.config import JWTConfig

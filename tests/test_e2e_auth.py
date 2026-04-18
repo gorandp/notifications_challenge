@@ -3,7 +3,7 @@
 # Authorization in endpoints
 from fastapi import status
 
-from app.external.database.main import db_session
+from app.external.fastapi_app.context import db_session
 from app.external.database import database_models as models
 from app.external.fastapi_app.auth import hash_password
 

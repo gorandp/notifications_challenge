@@ -7,7 +7,7 @@ from sqlalchemy import create_engine, select
 from app.core.user import User
 from app.core.notification import Notification
 from app.external.database import database_models as models
-from .main import get_session
+from ..fastapi_app.context import get_session
 
 
 class Database(IDatabase):

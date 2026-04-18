@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 
 from app.core.logger import LoggerConfig
 from app.external.database.database import Database
-from app.external.database.main import db_session, database_ctx
+from app.external.fastapi_app.context import db_session, database_ctx
 from app.external.database.database_models import Base as DatabaseBaseModel
 from app.external.fastapi_app.main import app as fastapi_app
 from app.external.fastapi_app.config import JWTConfig
