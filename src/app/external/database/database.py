@@ -7,7 +7,7 @@ from sqlalchemy import create_engine, select
 from app.core.user import User
 from app.core.notification import Notification
 from app.external.database import database_models as models
-from ..fastapi_app.context import get_session
+from ..fastapi_app.context import db_session
 
 
 class Database(IDatabase):
@@ -24,9 +24,17 @@ class Database(IDatabase):
             )
         self.session_local = sessionmaker(bind=self.engine)
 
+    async def get_current_session(self):
+        """Get the current session set on the beginning of each request.
+
+        Returns:
+            Session: SQL database session
+        """
+        return db_session.get()
+
     async def get_user(self, user_id):
-        db = await get_session()
-        result = db.execute(
+        session = await self.get_current_session()
+        result = session.execute(
             select(models.UserModel).where(
                 models.UserModel.id == user_id,
             )
@@ -35,14 +43,14 @@ class Database(IDatabase):
         return User(**user) if user else None
 
     async def get_all_users(self):
-        db = await get_session()
-        result = db.execute(select(models.UserModel))
+        session = await self.get_current_session()
+        result = session.execute(select(models.UserModel))
         r = result.scalars().all()
         return [User(**u) for u in r]
 
     async def get_notification(self, notification_id: int):
-        db = await get_session()
-        result = db.execute(
+        session = await self.get_current_session()
+        result = session.execute(
             select(models.NotificationModel).where(
                 models.NotificationModel.id == notification_id,
             )
@@ -51,8 +59,8 @@ class Database(IDatabase):
         return Notification(**notif) if notif else None
 
     async def get_all_notifications_by_user_id(self, user_id: int):
-        db = await get_session()
-        result = db.execute(
+        session = await self.get_current_session()
+        result = session.execute(
             select(models.NotificationModel).where(
                 models.NotificationModel.user_id == user_id,
             )
