@@ -17,6 +17,7 @@ class UserModel(Base):
     email: Mapped[str] = mapped_column(String(128), unique=True, index=True)
     password_hash: Mapped[str] = mapped_column(String(64))  # SHA-256 hash
     enabled: Mapped[bool] = mapped_column(Boolean)
+    role: Mapped[str] = mapped_column(String(16))
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
         default=lambda: datetime.now(UTC),
