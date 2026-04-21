@@ -15,8 +15,12 @@ from sqlalchemy import func, select
 
 # # from database_models import Base as DbBase
 from app.core.logger import LogWrapper
-from app.external.fastapi_app.context import get_session, database_ctx
-from app.external.database import database_models as models
+from app.core.user import ROLES as USER_ROLES
+from app.external.fastapi_app.context import (
+    database_ctx,
+    get_user_service,
+)
+from app.core.user_service import IUserService
 from . import schemas
 from .config import JWTConfig
 from .auth import (
@@ -47,6 +51,7 @@ async def login(
     ## in Cloudflare Workers
     # form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     request: Request,
+    u_serv: Annotated[IUserService, Depends(get_user_service)],
 ):
     form_data = await request.form()
     username = form_data.get("username")
@@ -59,7 +64,6 @@ async def login(
         )
     # Look up user by email (case-insensitive)
     # Note: OAuth2PasswordRequestForm uses "username" field, but we treat it as email
-    u_serv = user_service_ctx.get()
     user = await u_serv.get_user_by_email(username)
     if not user or not verify_password(password, user.password_hash):
         raise HTTPException(
@@ -86,6 +90,19 @@ async def get_current_user(
 ):
     """Get the currently authenticated user."""
     return current_user
+
+
+@app.get("/users", response_model=list[schemas.UserResponse])
+async def get_users(
+    current_user: CurrentUser,
+    u_serv: Annotated[IUserService, Depends(get_user_service)],
+):
+    if current_user.role != USER_ROLES.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User not allowed to get users",
+        )
+    return await u_serv.get_all_users()
 
 
 @app.get(

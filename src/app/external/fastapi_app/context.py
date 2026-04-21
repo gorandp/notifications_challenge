@@ -32,3 +32,7 @@ async def get_session() -> Session:
 
 async def get_db() -> IDatabase:
     return database_ctx.get()
+
+
+async def get_user_service() -> IUserService:
+    return user_service_ctx.get()
