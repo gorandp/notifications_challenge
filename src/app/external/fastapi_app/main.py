@@ -7,8 +7,8 @@ from fastapi import FastAPI, Request, HTTPException, status, Depends
 # from fastapi.security import OAuth2PasswordRequestForm
 
 # from starlette.exceptions import HTTPException as StarletteHTTPException
-from sqlalchemy.orm import Session
-from sqlalchemy import func, select
+# from sqlalchemy.orm import Session
+# from sqlalchemy import func, select
 
 # import jwt
 # from jwt.exceptions import InvalidTokenError
@@ -27,11 +27,11 @@ from app.core.user_service import IUserService
 from . import schemas
 from .config import JWTConfig
 from .auth import (
-    oauth2_scheme,
+    # oauth2_scheme,
     hash_password,
     verify_password,
     create_access_token,
-    verify_access_token,
+    # verify_access_token,
 )
 from .auth_dep import CurrentUser
 
