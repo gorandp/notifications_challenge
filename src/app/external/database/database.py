@@ -4,7 +4,7 @@ from app.core.database import IDatabase
 
 from sqlalchemy_cloudflare_d1 import create_engine_from_binding
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine, select, func
+from sqlalchemy import create_engine, select, func, update, delete
 
 from app.core.user import User
 from app.core.notification import Notification
@@ -94,6 +94,25 @@ class Database(IDatabase):
             )
             for u in r
         ]
+
+    async def update_user(self, user):
+        session = await self.get_current_session()
+        result = session.execute(
+            update(models.UserModel)
+            .where(
+                models.UserModel == user.id,
+            )
+            .values(**asdict(user))
+        )
+        return user
+
+    async def delete_user(self, user_id):
+        session = await self.get_current_session()
+        session.execute(
+            delete(models.UserModel).where(
+                models.UserModel == user_id,
+            )
+        )
 
     async def get_notification(self, notification_id: int):
         session = await self.get_current_session()

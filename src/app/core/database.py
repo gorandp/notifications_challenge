@@ -21,13 +21,13 @@ class IDatabase(ABC):
     async def get_all_users(self) -> list[User]:
         pass
 
-    # @abstractmethod
-    # async def update_user(self, user: User) -> None:
-    #     pass
+    @abstractmethod
+    async def update_user(self, user: User) -> None:
+        pass
 
-    # @abstractmethod
-    # async def delete_user(self, user_id: int) -> None:
-    #     pass
+    @abstractmethod
+    async def delete_user(self, user_id: int) -> None:
+        pass
 
     # @abstractmethod
     # async def add_notification(self, notification: Notification) -> None:

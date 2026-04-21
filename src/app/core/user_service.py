@@ -26,3 +26,11 @@ class IUserService(ABC):
     @abstractmethod
     async def get_all_users(self) -> list[User]:
         pass
+
+    @abstractmethod
+    async def update_user(self, user: User) -> User:
+        pass
+
+    @abstractmethod
+    async def delete_user(self, user_id: int) -> None:
+        pass

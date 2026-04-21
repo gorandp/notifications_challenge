@@ -27,10 +27,10 @@ class IUserRepository(ABC):
     async def get_all(self) -> list[User]:
         """Returns all users"""
 
-    # @abstractmethod
-    # async def update_user(self, user: User):
-    #     """Update user"""
+    @abstractmethod
+    async def update_user(self, user: User):
+        """Update user"""
 
-    # @abstractmethod
-    # async def delete_user(self, user_id: int):
-    #     """Delete user"""
+    @abstractmethod
+    async def delete_user(self, user_id: int):
+        """Delete user"""

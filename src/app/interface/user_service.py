@@ -16,3 +16,9 @@ class UserService(IUserService):
 
     async def get_all_users(self):
         return await self.repository.get_all()
+
+    async def update_user(self, user):
+        return await self.repository.update_user(user)
+
+    async def delete_user(self, user_id):
+        return await self.repository.delete_user(user_id)
