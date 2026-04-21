@@ -33,6 +33,7 @@ class UserCreate(UserBase):
     model_config = ConfigDict(from_attributes=True)
 
     password: str = Field(max_length=256)
+    role: str = Field(max_length=16, default="basic")
 
 
 class NotificationBase(BaseModel):

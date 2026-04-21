@@ -94,6 +94,53 @@ async def get_current_user(
     return current_user
 
 
+@app.post(
+    "/users",
+    response_model=schemas.UserResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_user(
+    user: schemas.UserCreate,
+    current_user: CurrentUser,
+    u_serv: Annotated[IUserService, Depends(get_user_service)],
+):
+    if current_user.role != USER_ROLES.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User not allowed to create users",
+        )
+    exists = await u_serv.get_user_by_email(user.email)
+    logger.info(f"{user.email}, {exists}")
+    if exists:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User email already in DB",
+        )
+    pwd = hash_password(user.password)
+    u = User(
+        email=user.email,
+        password_hash=pwd,
+        enabled=user.enabled,
+        role=user.role,
+    )
+    u = await u_serv.create_user(u)
+    return u
+
+
+@app.get("/users/{user_id}", response_model=schemas.UserResponse)
+async def get_user(
+    user_id: int,
+    current_user: CurrentUser,
+    u_serv: Annotated[IUserService, Depends(get_user_service)],
+):
+    if current_user.role != USER_ROLES.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User not allowed to get users",
+        )
+    return await u_serv.get_user(user_id)
+
+
 @app.get("/users", response_model=list[schemas.UserResponse])
 async def get_users(
     current_user: CurrentUser,

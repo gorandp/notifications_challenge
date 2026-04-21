@@ -1,3 +1,5 @@
+from dataclasses import asdict
+
 from app.core.database import IDatabase
 
 from sqlalchemy_cloudflare_d1 import create_engine_from_binding
@@ -34,10 +36,17 @@ class Database(IDatabase):
 
     async def create_user(self, user):
         session = await self.get_current_session()
-        u = models.UserModel(**user)
+        u = models.UserModel(**asdict(user))
         session.add(u)
         session.commit()
-        return User(**u)
+        return User(
+            id=u.id,
+            email=u.email,
+            password_hash=u.password_hash,
+            enabled=u.enabled,
+            role=u.role,
+            created_at=u.created_at,
+        )
 
     async def get_user(self, user_id=None, user_email=None):
         session = await self.get_current_session()
