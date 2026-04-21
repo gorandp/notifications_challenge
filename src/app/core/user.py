@@ -14,4 +14,4 @@ class User:
     enabled: bool
     id: int | None = None
     role: str = "basic"
-    created_at: datetime = field(default_factory=datetime.now(UTC))
+    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))

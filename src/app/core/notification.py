@@ -18,4 +18,4 @@ class Notification:
     id: int | None = None
     title: str = ""
     content: str = ""
-    inserted_at: datetime = field(default_factory=datetime.now(UTC))
+    inserted_at: datetime = field(default_factory=lambda: datetime.now(UTC))
