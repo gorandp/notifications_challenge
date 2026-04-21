@@ -20,6 +20,8 @@ from app.external.fastapi_app.context import (
     database_ctx,
     get_user_service,
 )
+from app.interface.notification_repository import NotificationRepository
+from app.interface.notification_service import NotificationService
 from app.core.user_service import IUserService
 from . import schemas
 from .config import JWTConfig
@@ -116,3 +118,16 @@ async def test_authentication(
         "current_user_id": current_user.id,
         "success": True,
     }
+
+
+@app.get(
+    "/notifications",
+    response_model=list[schemas.NotificationResponse],
+)
+async def get_notifications(
+    current_user: CurrentUser,
+):
+    notification_repository = NotificationRepository(database_ctx.get())
+    notification_service = NotificationService(notification_repository)
+
+    return await notification_service.get_all_notifications_from_user(current_user.id)

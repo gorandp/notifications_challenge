@@ -33,3 +33,20 @@ class UserCreate(UserBase):
     model_config = ConfigDict(from_attributes=True)
 
     password: str = Field(max_length=256)
+
+
+class NotificationBase(BaseModel):
+    title: str = Field(max_length=256)
+    body: str = Field(max_length=2048)
+    channel_id: str = Field()
+
+
+class NotificationCreate(NotificationBase):
+    model_config = ConfigDict(from_attributes=True)
+
+
+class NotificationResponse(NotificationBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int = Field()
+    user_id: int = Field()
