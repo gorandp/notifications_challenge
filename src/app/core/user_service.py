@@ -12,7 +12,15 @@ class IUserService(ABC):
         pass
 
     @abstractmethod
+    async def create_user(self, user: User) -> User:
+        pass
+
+    @abstractmethod
     async def get_user(self, user_id: int) -> User | None:
+        pass
+
+    @abstractmethod
+    async def get_user_by_email(self, email: str) -> User | None:
         pass
 
     @abstractmethod

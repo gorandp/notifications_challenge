@@ -65,6 +65,7 @@ class NotificationModel(Base):
         nullable=False,
         index=True,
     )
+    status: Mapped[int] = mapped_column(Integer, index=True)
     title: Mapped[str] = mapped_column(String(512))
     content: Mapped[str] = mapped_column(Text)
     recipient: Mapped[str] = mapped_column(String(512))

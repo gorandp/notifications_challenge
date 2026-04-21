@@ -5,12 +5,16 @@ from .notification import Notification
 
 
 class IDatabase(ABC):
-    # @abstractmethod
-    # async def add_user(self, user: User) -> None:
-    #     pass
+    @abstractmethod
+    async def create_user(self, user: User) -> None:
+        pass
 
     @abstractmethod
-    async def get_user(self, user_id: int) -> User | None:
+    async def get_user(
+        self,
+        user_id: int | None = None,
+        user_email: str | None = None,
+    ) -> User | None:
         pass
 
     @abstractmethod

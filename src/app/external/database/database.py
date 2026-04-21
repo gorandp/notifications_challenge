@@ -2,7 +2,7 @@ from app.core.database import IDatabase
 
 from sqlalchemy_cloudflare_d1 import create_engine_from_binding
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine, select, func
 
 from app.core.user import User
 from app.core.notification import Notification
@@ -32,21 +32,59 @@ class Database(IDatabase):
         """
         return db_session.get()
 
-    async def get_user(self, user_id):
+    async def create_user(self, user):
         session = await self.get_current_session()
-        result = session.execute(
-            select(models.UserModel).where(
-                models.UserModel.id == user_id,
+        u = models.UserModel(**user)
+        session.add(u)
+        session.commit()
+        return User(**u)
+
+    async def get_user(self, user_id=None, user_email=None):
+        session = await self.get_current_session()
+        if user_id:
+            result = session.execute(
+                select(models.UserModel).where(
+                    models.UserModel.id == user_id,
+                )
             )
+            user = result.scalars().first()
+        elif user_email:
+            result = session.execute(
+                select(models.UserModel).where(
+                    func.lower(models.UserModel.email) == user_email.lower(),
+                )
+            )
+            user = result.scalars().first()
+        else:
+            raise ValueError("ID or email must be provided")
+        return (
+            User(
+                id=user.id,
+                email=user.email,
+                password_hash=user.password_hash,
+                enabled=user.enabled,
+                role=user.role,
+                created_at=user.created_at,
+            )
+            if user
+            else None
         )
-        user = result.scalars().first()
-        return User(**user) if user else None
 
     async def get_all_users(self):
         session = await self.get_current_session()
         result = session.execute(select(models.UserModel))
         r = result.scalars().all()
-        return [User(**u) for u in r]
+        return [
+            User(
+                id=u.id,
+                email=u.email,
+                password_hash=u.password_hash,
+                enabled=u.enabled,
+                role=u.role,
+                created_at=u.created_at,
+            )
+            for u in r
+        ]
 
     async def get_notification(self, notification_id: int):
         session = await self.get_current_session()
@@ -56,7 +94,20 @@ class Database(IDatabase):
             )
         )
         notif = result.scalars().first()
-        return Notification(**notif) if notif else None
+        return (
+            Notification(
+                id=notif.id,
+                user_id=notif.user_id,
+                channel_id=notif.channel_id,
+                status=notif.status,
+                recipient=notif.recipient,
+                title=notif.title,
+                content=notif.content,
+                inserted_at=notif.inserted_at,
+            )
+            if notif
+            else None
+        )
 
     async def get_all_notifications_by_user_id(self, user_id: int):
         session = await self.get_current_session()
@@ -66,4 +117,16 @@ class Database(IDatabase):
             )
         )
         r = result.scalars().all()
-        return [Notification(**n) for n in r]
+        return [
+            Notification(
+                id=n.id,
+                user_id=n.user_id,
+                channel_id=n.channel_id,
+                status=n.status,
+                recipient=n.recipient,
+                title=n.title,
+                content=n.content,
+                inserted_at=n.inserted_at,
+            )
+            for n in r
+        ]
