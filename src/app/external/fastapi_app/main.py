@@ -16,6 +16,7 @@ from sqlalchemy import func, select
 # # from database_models import Base as DbBase
 from app.core.logger import LogWrapper
 from app.core.user import ROLES as USER_ROLES
+from app.core.user import User
 from app.external.fastapi_app.context import (
     database_ctx,
     get_user_service,
