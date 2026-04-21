@@ -47,7 +47,6 @@ async def login(
     ## in Cloudflare Workers
     # form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     request: Request,
-    db: Annotated[Session, Depends(get_session)],
 ):
     form_data = await request.form()
     username = form_data.get("username")
@@ -60,12 +59,8 @@ async def login(
         )
     # Look up user by email (case-insensitive)
     # Note: OAuth2PasswordRequestForm uses "username" field, but we treat it as email
-    result = db.execute(
-        select(models.UserModel).where(
-            func.lower(models.UserModel.email) == username.lower(),
-        )
-    )
-    user = result.scalars().first()
+    u_serv = user_service_ctx.get()
+    user = await u_serv.get_user_by_email(username)
     if not user or not verify_password(password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
