@@ -139,7 +139,13 @@ async def get_user(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="User not allowed to get users",
         )
-    return await u_serv.get_user(user_id)
+    user = await u_serv.get_user(user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+    return user
 
 
 @app.get("/users", response_model=list[schemas.UserResponse])
