@@ -1,18 +1,15 @@
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
-from sqlalchemy import select
-from sqlalchemy.orm import Session
 
-from app.external.database.main import get_db
-from app.external.database import database_models as models
+from app.core.user import User
+from app.external.fastapi_app.context import user_service_ctx
 from .auth import oauth2_scheme, verify_access_token
 
 
 async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
-    db: Annotated[Session, Depends(get_db)],
-) -> models.UserModel:
+) -> User:
     user_id = verify_access_token(token)
     if user_id is None:
         raise HTTPException(
@@ -30,12 +27,8 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    result = db.execute(
-        select(models.UserModel).where(
-            models.UserModel.id == user_id_int,
-        )
-    )
-    user = result.scalars().first()
+    u_serv = user_service_ctx.get()
+    user = await u_serv.get_user(user_id_int)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -45,4 +38,4 @@ async def get_current_user(
     return user
 
 
-CurrentUser = Annotated[models.UserModel, Depends(get_current_user)]
+CurrentUser = Annotated[User, Depends(get_current_user)]
