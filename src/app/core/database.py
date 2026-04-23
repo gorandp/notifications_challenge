@@ -22,7 +22,7 @@ class IDatabase(ABC):
         pass
 
     @abstractmethod
-    async def update_user(self, user: User) -> None:
+    async def update_user(self, user_id: int, user: User) -> None:
         pass
 
     @abstractmethod

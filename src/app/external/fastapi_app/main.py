@@ -161,6 +161,93 @@ async def get_users(
     return await u_serv.get_all_users()
 
 
+# @app.put("/users/{user_id}", response_model=schemas.UserResponse)
+# async def update_user_full(
+#     current_user: CurrentUser,
+#     user_id: int,
+#     user_data: schemas.UserCreate,
+#     u_serv: Annotated[IUserService, Depends(get_user_service)],
+# ):
+#     if current_user.role != USER_ROLES.ADMIN:
+#         raise HTTPException(
+#             status_code=status.HTTP_403_FORBIDDEN,
+#             detail="User not allowed to get users",
+#         )
+#     user = await u_serv.get_user(user_id)
+#     if not user:
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND,
+#             detail="User not found",
+#         )
+#     user.email = user_data.email
+#     user.enabled = user_data.enabled
+#     user.password_hash = hash_password(user_data.password)
+#     user.role = user_data.role
+#     await u_serv.update_user(user_id, user)
+#     return user
+
+
+@app.patch(
+    "/users/{user_id}",
+    response_model=schemas.UserResponse,
+)
+async def update_user_partial(
+    current_user: CurrentUser,
+    user_id: int,
+    user_data: schemas.UserUpdate,
+    u_serv: Annotated[IUserService, Depends(get_user_service)],
+):
+    if current_user.role != USER_ROLES.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User not allowed to get users",
+        )
+    user = await u_serv.get_user(user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+    user_data_u = user_data.model_dump(exclude_unset=True)
+    if "email" in user_data_u and user.email != user_data_u.get("email"):
+        exists = await u_serv.get_user_by_email(user_data_u["email"])
+        if exists:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already in use",
+            )
+    for k, v in user_data_u.items():
+        if k == "password":
+            setattr(user, k, hash_password(v))
+        else:
+            setattr(user, k, v)
+    await u_serv.update_user(user_id, user)
+    return user
+
+
+@app.delete(
+    "/users/{user_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def delete_user(
+    current_user: CurrentUser,
+    user_id: int,
+    u_serv: Annotated[IUserService, Depends(get_user_service)],
+):
+    if current_user.role != USER_ROLES.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User not allowed to get users",
+        )
+    user = await u_serv.get_user(user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+    await u_serv.delete_user(user_id)
+
+
 @app.get(
     "/testAuth",
     response_model=schemas.AuthTestResponse,

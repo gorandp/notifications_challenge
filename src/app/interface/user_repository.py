@@ -17,8 +17,8 @@ class UserRepository(IUserRepository):
     async def get_all(self):
         return await self.db.get_all_users()
 
-    async def update_user(self, user):
-        return await self.db.update_user(user)
+    async def update_user(self, user_id, user):
+        return await self.db.update_user(user_id, user)
 
     async def delete_user(self, user_id):
         return await self.db.delete_user(user_id)

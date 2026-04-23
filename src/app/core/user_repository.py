@@ -28,7 +28,7 @@ class IUserRepository(ABC):
         """Returns all users"""
 
     @abstractmethod
-    async def update_user(self, user: User):
+    async def update_user(self, user_id: int, user: User):
         """Update user"""
 
     @abstractmethod

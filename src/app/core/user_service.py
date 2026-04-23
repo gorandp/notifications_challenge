@@ -28,7 +28,7 @@ class IUserService(ABC):
         pass
 
     @abstractmethod
-    async def update_user(self, user: User) -> User:
+    async def update_user(self, user_id: int, user: User) -> None:
         pass
 
     @abstractmethod

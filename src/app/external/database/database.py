@@ -95,22 +95,21 @@ class Database(IDatabase):
             for u in r
         ]
 
-    async def update_user(self, user):
+    async def update_user(self, user_id, user):
         session = await self.get_current_session()
-        result = session.execute(
+        session.execute(
             update(models.UserModel)
             .where(
-                models.UserModel == user.id,
+                models.UserModel.id == user_id,
             )
             .values(**asdict(user))
         )
-        return user
 
     async def delete_user(self, user_id):
         session = await self.get_current_session()
         session.execute(
             delete(models.UserModel).where(
-                models.UserModel == user_id,
+                models.UserModel.id == user_id,
             )
         )
 

@@ -36,6 +36,13 @@ class UserCreate(UserBase):
     role: str = Field(max_length=16, default="basic")
 
 
+class UserUpdate(UserBase):
+    email: str | None = Field(default=None, max_length=120)
+    enabled: bool | None = Field(default=None)
+    password: str | None = Field(default=None, max_length=256)
+    role: str | None = Field(default=None, max_length=16)
+
+
 class NotificationBase(BaseModel):
     title: str = Field(max_length=256)
     body: str = Field(max_length=2048)
