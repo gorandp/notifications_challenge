@@ -26,6 +26,15 @@ def init_context(db: IDatabase):
     user_service_ctx.set(u_service)
 
 
+def clear_context():
+    try:
+        database_ctx.reset()
+        user_repository_ctx.reset()
+        user_service_ctx.reset()
+    except Exception:
+        pass
+
+
 async def get_session() -> Session:
     return db_session.get()
 

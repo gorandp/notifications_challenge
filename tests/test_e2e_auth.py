@@ -3,29 +3,7 @@
 # Authorization in endpoints
 from fastapi import status
 
-from app.external.fastapi_app.context import db_session
-from app.external.database import database_models as models
-from app.external.fastapi_app.auth import hash_password
-
-
-def _create_test_user() -> tuple[models.UserModel, str]:
-    """Create a test user
-
-    Returns:
-        tuple[models.User, str]: Returns the user and original password
-    """
-    db = db_session.get()
-    pwd = "Password123!"
-    password_hash = hash_password(pwd)
-    new_user = models.UserModel(
-        email="test@example.com",
-        password_hash=password_hash,
-        enabled=True,
-    )
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return new_user, pwd
+from db_data import generate_user
 
 
 def test_unauthenticated(client):
@@ -34,7 +12,7 @@ def test_unauthenticated(client):
 
 
 def test_login(client):
-    u, pwd = _create_test_user()
+    u, pwd = generate_user()
     r = client.post(
         "/token",
         data={
@@ -56,7 +34,7 @@ def test_login(client):
 
 
 def test_authenticated_endpoint(client):
-    u, pwd = _create_test_user()
+    u, pwd = generate_user()
     r = client.post(
         "/token",
         data={

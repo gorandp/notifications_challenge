@@ -1,9 +1,8 @@
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
-from app.external.fastapi_app.context import db_session
+from app.external.fastapi_app.context import init_context, clear_context, db_session
+from app.external.database.database import Database
 from app.external.database.database_models import Base as DatabaseBaseModel
 from app.external.fastapi_app.main import app
 from app.external.fastapi_app.config import JWTConfig
@@ -17,15 +16,12 @@ def client():
         db_session.reset()
     except Exception:
         pass
-    engine = create_engine(
-        "sqlite:///./test.db",
-        connect_args={"check_same_thread": False},
-    )
-    DatabaseBaseModel.metadata.drop_all(bind=engine)  # Delete tables if exist
-    DatabaseBaseModel.metadata.create_all(bind=engine)  # Create tables if not exist
-    SessionLocal = sessionmaker(bind=engine)
-    session = SessionLocal()
-    db_session.set(session)
+    clear_context()
+    db = Database({"url": "sqlite:///./test.db"})
+    DatabaseBaseModel.metadata.drop_all(bind=db.engine)  # Delete tables if exist
+    DatabaseBaseModel.metadata.create_all(bind=db.engine)  # Create tables if not exist
+    init_context(db)
+    db_session.set(db.session_local())
     JWTConfig.set_secret("secret123456789012345678901234567890")
     return TestClient(app)
 

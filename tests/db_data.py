@@ -5,7 +5,7 @@ from app.external.database import database_models as models
 from app.external.fastapi_app.auth import hash_password
 
 
-def generate_user():
+def generate_user(role="basic"):
     """Create a test user
 
     Returns:
@@ -18,6 +18,7 @@ def generate_user():
         email=f"{uuid4()}@example.com",
         password_hash=password_hash,
         enabled=True,
+        role=role,
     )
     db.add(new_user)
     db.commit()
