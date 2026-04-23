@@ -9,4 +9,7 @@ def login(client: TestClient, username: str, pwd: str):
             "password": pwd,
         },
     )
-    return r.json()["access_token"]
+    data = r.json()
+    if "access_token" not in data:
+        raise ValueError("Login failed")
+    return data["access_token"]
