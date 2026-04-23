@@ -104,6 +104,7 @@ class Database(IDatabase):
             )
             .values(**asdict(user))
         )
+        session.commit()
 
     async def delete_user(self, user_id):
         session = await self.get_current_session()
@@ -112,6 +113,7 @@ class Database(IDatabase):
                 models.UserModel.id == user_id,
             )
         )
+        session.commit()
 
     async def get_notification(self, notification_id: int):
         session = await self.get_current_session()
