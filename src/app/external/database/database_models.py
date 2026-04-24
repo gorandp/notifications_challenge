@@ -65,6 +65,7 @@ class NotificationModel(Base):
         nullable=False,
         index=True,
     )
+    channel_type: Mapped[str] = mapped_column(String(16))
     status: Mapped[int] = mapped_column(Integer, index=True)
     title: Mapped[str] = mapped_column(String(512))
     content: Mapped[str] = mapped_column(Text)

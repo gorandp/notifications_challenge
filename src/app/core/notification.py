@@ -12,7 +12,8 @@ class NotifStatus(IntEnum):
 @dataclass
 class Notification:
     user_id: int
-    channel_id: str
+    channel_id: int
+    channel_type: str
     status: int
     recipient: str
     id: int | None = None

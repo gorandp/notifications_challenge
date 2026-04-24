@@ -44,9 +44,11 @@ class UserUpdate(UserBase):
 
 
 class NotificationBase(BaseModel):
-    title: str = Field(max_length=256)
-    body: str = Field(max_length=2048)
-    channel_id: str = Field()
+    channel_id: int = Field()
+    status: int = Field()
+    title: str = Field(max_length=512)
+    content: str = Field(max_length=16384)
+    recipient: str = Field(max_length=512)
 
 
 class NotificationCreate(NotificationBase):
@@ -58,3 +60,5 @@ class NotificationResponse(NotificationBase):
 
     id: int = Field()
     user_id: int = Field()
+    channel_type: str = Field(max_length=16)
+    inserted_at: datetime = Field()
