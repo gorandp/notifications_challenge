@@ -130,7 +130,7 @@ def test_get_notifications_ownership(client):
         channel1.id,
         channel1.type,
     )
-    channel2 = generate_an_email_channel(u1.id)
+    channel2 = generate_an_email_channel(u2.id)
     notification2 = generate_notification(
         u2.id,
         channel2.id,
