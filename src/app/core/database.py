@@ -30,9 +30,9 @@ class IDatabase(ABC):
     async def delete_user(self, user_id: int) -> None:
         pass
 
-    # @abstractmethod
-    # async def add_notification(self, notification: Notification) -> None:
-    #     pass
+    @abstractmethod
+    async def create_notification(self, notification: Notification) -> None:
+        pass
 
     @abstractmethod
     async def get_notification(self, notification_id: int) -> Notification | None:
@@ -44,13 +44,17 @@ class IDatabase(ABC):
     ) -> list[Notification]:
         pass
 
-    # @abstractmethod
-    # async def update_notification(self, notification: Notification) -> None:
-    #     pass
+    @abstractmethod
+    async def update_notification(
+        self,
+        notification_id: int,
+        notification: Notification,
+    ) -> None:
+        pass
 
-    # @abstractmethod
-    # async def delete_notification(self, notification_id: int) -> None:
-    #     pass
+    @abstractmethod
+    async def delete_notification(self, notification_id: int) -> None:
+        pass
 
     @abstractmethod
     async def create_channel(self, channel: Channel) -> Channel:

@@ -1,11 +1,10 @@
 from dataclasses import asdict
 
-from app.core.database import IDatabase
-
 from sqlalchemy_cloudflare_d1 import create_engine_from_binding
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, select, func, update, delete
 
+from app.core.database import IDatabase
 from app.core.user import User
 from app.core.notification import Notification
 from app.core.channel import Channel
@@ -116,6 +115,23 @@ class Database(IDatabase):
         )
         session.commit()
 
+    async def create_notification(self, notification):
+        session = await self.get_current_session()
+        n = models.NotificationModel(**asdict(notification))
+        session.add(n)
+        session.commit()
+        return Notification(
+            id=n.id,
+            user_id=n.user_id,
+            channel_id=n.channel_id,
+            channel_type=n.channel_type,
+            status=n.status,
+            recipient=n.recipient,
+            title=n.title,
+            content=n.content,
+            inserted_at=n.inserted_at,
+        )
+
     async def get_notification(self, notification_id: int):
         session = await self.get_current_session()
         result = session.execute(
@@ -162,6 +178,24 @@ class Database(IDatabase):
             )
             for n in r
         ]
+
+    async def update_notification(self, notification_id, notification):
+        session = await self.get_current_session()
+        session.execute(
+            update(models.NotificationModel)
+            .where(models.NotificationModel.id == notification_id)
+            .values(**asdict(notification))
+        )
+        session.commit()
+
+    async def delete_notification(self, notification_id):
+        session = await self.get_current_session()
+        session.execute(
+            delete(models.NotificationModel).where(
+                models.NotificationModel.id == notification_id,
+            )
+        )
+        session.commit()
 
     async def create_channel(self, channel):
         session = await self.get_current_session()
