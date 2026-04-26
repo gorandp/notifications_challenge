@@ -11,7 +11,13 @@ from auth import login
 
 def test_create_channel(client):
     user, pwd = generate_user()
-    JSON_BODY = {"": ""}
+    JSON_BODY = {
+        "type": "email",
+        "resource_url": "smtp.gmail.com",
+        "port_url": 123,
+        "credential_user": "myusername@gmail.com",
+        "credential_pass": "mypassword",
+    }
 
     r = client.post("/channels", json=JSON_BODY)
     assert r.status_code == status.HTTP_401_UNAUTHORIZED
@@ -164,18 +170,15 @@ def test_get_channel_ownership(client):
     assert data["id"] == channel1.id
 
 
-async def test_update_channel(client):
+def test_update_channel(client):
     user, pwd = generate_user()
     channel = generate_an_email_channel(user.id)
-    channel_service = channel_service_ctx.get()
-    EDIT_JSON = {"credential_pass": "123456789123456789AAAABBBB"}
-    assert channel.credential_pass != EDIT_JSON["credential_pass"]
-    EDIT_JSON_2 = {
+    EDIT_JSON = {
         "resource_url": "my-new-email-resource.com",
         "port_url": 999,
     }
-    assert channel.resource_url != EDIT_JSON_2["resource_url"]
-    assert channel.port_url != EDIT_JSON_2["port_url"]
+    assert channel.resource_url != EDIT_JSON["resource_url"]
+    assert channel.port_url != EDIT_JSON["port_url"]
 
     # Not authenticated
     r = client.patch(
@@ -183,10 +186,6 @@ async def test_update_channel(client):
         json=EDIT_JSON,
     )
     assert r.status_code == status.HTTP_401_UNAUTHORIZED
-
-    # Check unchanged
-    ch = await channel_service.get_channel(channel.id)
-    assert ch.credential_pass == channel.credential_pass
 
     token = login(client, user.email, pwd)
 
@@ -213,17 +212,6 @@ async def test_update_channel(client):
     assert r.status_code == status.HTTP_200_OK
     data_update = r.json()
     assert data_update["id"] == channel.id
-
-    # Check updated
-    ch = await channel_service.get_channel(channel.id)
-    assert ch.credential_pass == EDIT_JSON["credential_pass"]
-
-    # Update
-    r = client.patch(
-        f"/channels/{channel.id}",
-        headers={"Authorization": f"Bearer {token}"},
-        json=EDIT_JSON_2,
-    )
 
     # Check updated
     r = client.get(

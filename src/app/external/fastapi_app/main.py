@@ -20,11 +20,11 @@ app.include_router(
     prefix="/notifications",
     tags=["notifications"],
 )
-# app.include_router(
-#     channels.router,
-#     prefix="/channels",
-#     tags=["channels"],
-# )
+app.include_router(
+    channels.router,
+    prefix="/channels",
+    tags=["channels"],
+)
 
 logger = LogWrapper("main").logger
 
