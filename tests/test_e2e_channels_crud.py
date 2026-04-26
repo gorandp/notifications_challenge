@@ -1,6 +1,5 @@
 from fastapi import status
 
-from app.external.fastapi_app.context import channel_service_ctx
 from db_data import (
     generate_user,
     generate_an_email_channel,
