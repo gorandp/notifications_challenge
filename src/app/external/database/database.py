@@ -5,10 +5,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, select, func, update, delete
 
 from app.core.database import IDatabase
-from app.core.user import User
-from app.core.notification import Notification
-from app.core.channel import Channel
 from app.external.database import database_models as models
+from app.external.database import database_mappers as mappers
 from ..fastapi_app.context import db_session
 
 
@@ -36,17 +34,10 @@ class Database(IDatabase):
 
     async def create_user(self, user):
         session = await self.get_current_session()
-        u = models.UserModel(**asdict(user))
+        u = mappers.dump_user_to_db_model(user)
         session.add(u)
         session.commit()
-        return User(
-            id=u.id,
-            email=u.email,
-            password_hash=u.password_hash,
-            enabled=u.enabled,
-            role=u.role,
-            created_at=u.created_at,
-        )
+        return mappers.load_user_from_db_model(u)
 
     async def get_user(self, user_id=None, user_email=None):
         session = await self.get_current_session()
@@ -66,34 +57,13 @@ class Database(IDatabase):
             user = result.scalars().first()
         else:
             raise ValueError("ID or email must be provided")
-        return (
-            User(
-                id=user.id,
-                email=user.email,
-                password_hash=user.password_hash,
-                enabled=user.enabled,
-                role=user.role,
-                created_at=user.created_at,
-            )
-            if user
-            else None
-        )
+        return mappers.load_user_from_db_model(user)
 
     async def get_all_users(self):
         session = await self.get_current_session()
         result = session.execute(select(models.UserModel))
         r = result.scalars().all()
-        return [
-            User(
-                id=u.id,
-                email=u.email,
-                password_hash=u.password_hash,
-                enabled=u.enabled,
-                role=u.role,
-                created_at=u.created_at,
-            )
-            for u in r
-        ]
+        return [mappers.load_user_from_db_model(u) for u in r]
 
     async def update_user(self, user_id, user):
         session = await self.get_current_session()
@@ -117,20 +87,10 @@ class Database(IDatabase):
 
     async def create_notification(self, notification):
         session = await self.get_current_session()
-        n = models.NotificationModel(**asdict(notification))
+        n = mappers.dump_notification_to_db_model(notification)
         session.add(n)
         session.commit()
-        return Notification(
-            id=n.id,
-            user_id=n.user_id,
-            channel_id=n.channel_id,
-            channel_type=n.channel_type,
-            status=n.status,
-            recipient=n.recipient,
-            title=n.title,
-            content=n.content,
-            inserted_at=n.inserted_at,
-        )
+        return mappers.load_notification_from_db_model(n)
 
     async def get_notification(self, notification_id: int):
         session = await self.get_current_session()
@@ -140,21 +100,7 @@ class Database(IDatabase):
             )
         )
         notif = result.scalars().first()
-        return (
-            Notification(
-                id=notif.id,
-                user_id=notif.user_id,
-                channel_id=notif.channel_id,
-                channel_type=notif.channel_type,
-                status=notif.status,
-                recipient=notif.recipient,
-                title=notif.title,
-                content=notif.content,
-                inserted_at=notif.inserted_at,
-            )
-            if notif
-            else None
-        )
+        return mappers.load_notification_from_db_model(notif)
 
     async def get_all_notifications_by_user_id(self, user_id: int):
         session = await self.get_current_session()
@@ -164,20 +110,7 @@ class Database(IDatabase):
             )
         )
         r = result.scalars().all()
-        return [
-            Notification(
-                id=n.id,
-                user_id=n.user_id,
-                channel_id=n.channel_id,
-                channel_type=n.channel_type,
-                status=n.status,
-                recipient=n.recipient,
-                title=n.title,
-                content=n.content,
-                inserted_at=n.inserted_at,
-            )
-            for n in r
-        ]
+        return [mappers.load_notification_from_db_model(n) for n in r]
 
     async def update_notification(self, notification_id, notification):
         session = await self.get_current_session()
@@ -199,18 +132,10 @@ class Database(IDatabase):
 
     async def create_channel(self, channel):
         session = await self.get_current_session()
-        c = models.ChannelModel(**asdict(channel))
+        c = mappers.dump_channel_to_db_model(channel)
         session.add(c)
         session.commit()
-        return Channel(
-            id=c.id,
-            user_id=c.user_id,
-            type=c.type,
-            credential_user=c.credential_user,
-            credential_pass=c.credential_pass,
-            resource_url=c.resource_url,
-            port_url=c.port_url,
-        )
+        return mappers.load_channel_from_db_model(c)
 
     async def get_channel(self, channel_id=None, user_id=None, channel_type=None):
         session = await self.get_current_session()
@@ -231,15 +156,7 @@ class Database(IDatabase):
                 .limit(1)
             )
             c = r.scalars().first()
-        return Channel(
-            id=c.id,
-            user_id=c.user_id,
-            type=c.type,
-            credential_user=c.credential_user,
-            credential_pass=c.credential_pass,
-            resource_url=c.resource_url,
-            port_url=c.port_url,
-        )
+        return mappers.load_channel_from_db_model(c)
 
     async def get_all_channels(self, user_id=None):
         session = await self.get_current_session()
@@ -253,18 +170,7 @@ class Database(IDatabase):
                 )
             )
             cs = r.scalars().all()
-        return [
-            Channel(
-                id=c.id,
-                user_id=c.user_id,
-                type=c.type,
-                credential_user=c.credential_user,
-                credential_pass=c.credential_pass,
-                resource_url=c.resource_url,
-                port_url=c.port_url,
-            )
-            for c in cs
-        ]
+        return [mappers.load_channel_from_db_model(c) for c in cs]
 
     async def update_channel(self, channel_id, channel):
         session = await self.get_current_session()
