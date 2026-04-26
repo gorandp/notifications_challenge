@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from app.external.fastapi_app.context import init_context, clear_context, db_session
+from app.external.fastapi_app.context import init_context, db_session
 from app.external.database.database import Database
 from app.external.database.database_models import Base as DatabaseBaseModel
 from app.external.fastapi_app.main import app
@@ -13,10 +13,8 @@ def client():
     try:
         old_session = db_session.get()
         old_session.close()
-        db_session.reset()
     except Exception:
         pass
-    clear_context()
     db = Database({"url": "sqlite:///./test.db"})
     DatabaseBaseModel.metadata.drop_all(bind=db.engine)  # Delete tables if exist
     DatabaseBaseModel.metadata.create_all(bind=db.engine)  # Create tables if not exist
