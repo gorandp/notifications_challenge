@@ -1,5 +1,6 @@
 from uuid import uuid4
 
+from app.core.notification import NotifStatus
 from app.external.fastapi_app.context import db_session
 from app.external.database import database_models as models
 from app.external.fastapi_app.auth import hash_password
@@ -26,7 +27,32 @@ def generate_user(role="basic"):
     return new_user, pwd
 
 
-def generate_notification(user_id: int) -> models.NotificationModel:
+def generate_an_email_channel(user_id: int) -> models.ChannelModel:
+    """Create a test email channel
+
+    Returns:
+        models.ChannelModel: Returns the channel
+    """
+    db = db_session.get()
+    new_channel = models.ChannelModel(
+        user_id=user_id,
+        type="email",
+        credential_user="username",
+        credential_pass="userpassword",
+        resource_url="smtp.gmail.com",
+        port_url=587,
+    )
+    db.add(new_channel)
+    db.commit()
+    db.refresh(new_channel)
+    return new_channel
+
+
+def generate_notification(
+    user_id: int,
+    channel_id: int,
+    channel_type: str,
+) -> models.NotificationModel:
     """Create a test notification
 
     Returns:
@@ -35,7 +61,9 @@ def generate_notification(user_id: int) -> models.NotificationModel:
     db = db_session.get()
     new_notification = models.NotificationModel(
         user_id=user_id,
-        channel_id="email",
+        channel_id=channel_id,
+        channel_type=channel_type,
+        status=NotifStatus.PENDING.value,
         title="Test Notification",
         content="This is the content of the notification",
         recipient="testrecipient@example.com",
