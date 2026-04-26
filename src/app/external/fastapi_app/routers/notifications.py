@@ -56,11 +56,11 @@ async def get_notifications(
     n_serv: Annotated[NotificationService, Depends(get_notification_service)],
 ):
     ns = await n_serv.get_all_notifications_from_user(current_user.id)
-    if not ns:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Any notifications found",
-        )
+    # if not ns:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_404_NOT_FOUND,
+    #         detail="Any notifications found",
+    #     )
     return ns
 
 
