@@ -7,7 +7,7 @@ from app.core.user import ROLES as USER_ROLES
 from app.core.user import User
 from app.interface.user_service import UserService
 from app.external.fastapi_app.context import get_user_service
-from .. import schemas
+from . import users_schemas as schemas
 from ..auth_dep import CurrentUser
 from ..auth import hash_password
 

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, Field
 
 
 class AuthResponse(BaseModel):
@@ -14,28 +14,3 @@ class AuthRequest(BaseModel):
 class AuthTestResponse(BaseModel):
     current_user_id: int = Field()
     success: bool = Field(default=False)
-
-
-class UserBase(BaseModel):
-    email: str = Field(max_length=120)
-    enabled: bool = Field(default=False)
-
-
-class UserResponse(UserBase):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-
-
-class UserCreate(UserBase):
-    model_config = ConfigDict(from_attributes=True)
-
-    password: str = Field(max_length=256)
-    role: str = Field(max_length=16, default="basic")
-
-
-class UserUpdate(UserBase):
-    email: str | None = Field(default=None, max_length=120)
-    enabled: bool | None = Field(default=None)
-    password: str | None = Field(default=None, max_length=256)
-    role: str | None = Field(default=None, max_length=16)
