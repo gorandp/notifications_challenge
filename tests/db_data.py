@@ -30,6 +30,9 @@ def generate_user(role="basic"):
 def generate_an_email_channel(user_id: int) -> models.ChannelModel:
     """Create a test email channel
 
+    Args:
+        user_id (int): User ID
+
     Returns:
         models.ChannelModel: Returns the channel
     """
@@ -41,6 +44,30 @@ def generate_an_email_channel(user_id: int) -> models.ChannelModel:
         credential_pass="userpassword",
         resource_url="smtp.gmail.com",
         port_url=587,
+    )
+    db.add(new_channel)
+    db.commit()
+    db.refresh(new_channel)
+    return new_channel
+
+
+def generate_a_sms_channel(user_id: int) -> models.ChannelModel:
+    """Create a test SMS channel
+
+    Args:
+        user_id (int): User ID
+
+    Returns:
+        models.ChannelModel: Returns the channel
+    """
+    db = db_session.get()
+    new_channel = models.ChannelModel(
+        user_id=user_id,
+        type="sms",
+        credential_user="username",
+        credential_pass="userpassword",
+        resource_url="sms.service.com",  # not real
+        port_url=999,  # not real
     )
     db.add(new_channel)
     db.commit()
