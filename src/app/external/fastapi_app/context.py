@@ -30,21 +30,18 @@ def init_context(db: IDatabase):
     database_ctx.set(db)
 
     u_repo = UserRepository(db)
-    user_repository_ctx.set(u_repo)
-
     u_serv = UserService(u_repo)
+    user_repository_ctx.set(u_repo)
     user_service_ctx.set(u_serv)
 
     c_repo = ChannelRepository(db)
-    channel_repository_ctx.set(c_repo)
-
     c_serv = ChannelService(c_repo)
+    channel_repository_ctx.set(c_repo)
     channel_service_ctx.set(c_serv)
 
     n_repo = NotificationRepository(db)
+    n_serv = NotificationService(n_repo)
     notification_repository_ctx.set(n_repo)
-
-    n_serv = NotificationService(db)
     notification_service_ctx.set(n_serv)
 
 
