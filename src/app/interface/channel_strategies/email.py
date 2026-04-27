@@ -15,6 +15,8 @@ from app.interface.channel_strategies.email_mock_server import (
 
 
 class EmailChannel(IChannelStrategy):
+    strategy_type = "email"
+
     def __init__(self, channel):
         self.channel = channel
         self.server = None
