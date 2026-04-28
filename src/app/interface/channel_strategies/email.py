@@ -6,6 +6,7 @@ from email.mime.text import MIMEText
 # from email.header import Header
 # from email.utils import formataddr
 
+from app.core.channel import ChannelType
 from app.core.channel_strategy import IChannelStrategy
 from app.core.logger import LoggerConfig
 from app.interface.channel_strategies.email_mock_server import (
@@ -15,7 +16,7 @@ from app.interface.channel_strategies.email_mock_server import (
 
 
 class EmailChannel(IChannelStrategy):
-    strategy_type = "email"
+    strategy_type = ChannelType.EMAIL.value
 
     def __init__(self, channel):
         self.channel = channel

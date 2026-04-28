@@ -1,4 +1,11 @@
 from dataclasses import dataclass
+from enum import StrEnum
+
+
+class ChannelType(StrEnum):
+    EMAIL = "email"
+    SMS = "sms"
+    PUSH = "push"
 
 
 @dataclass
