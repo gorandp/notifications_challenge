@@ -8,6 +8,11 @@ from db_data import (
 from auth import login
 
 
+# ------------------ #
+# ----- CREATE ----- #
+# ------------------ #
+
+
 def test_create_channel(client):
     user, pwd = generate_user()
     JSON_BODY = {
@@ -33,7 +38,7 @@ def test_create_channel(client):
     assert isinstance(data_before, list)
     assert len(data_before) == 0
 
-    # Create notification
+    # Create channel
     r = client.post(
         "/channels",
         headers={"Authorization": f"Bearer {token}"},
@@ -54,6 +59,11 @@ def test_create_channel(client):
     assert isinstance(data_after, list)
     assert len(data_after) == 1
     assert data_after[0]["id"] == new_channel_id
+
+
+# ------------------ #
+# ------ READ ------ #
+# ------------------ #
 
 
 def test_get_channels(client):
@@ -117,6 +127,12 @@ def test_get_channel(client):
     data = r.json()
     assert data["id"] == channel.id
 
+    r = client.get(
+        "/channels/9999",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert r.status_code == status.HTTP_404_NOT_FOUND
+
 
 def test_get_channels_ownership(client):
     u1, pwd1 = generate_user()
@@ -167,6 +183,37 @@ def test_get_channel_ownership(client):
     assert r.status_code == status.HTTP_200_OK
     data = r.json()
     assert data["id"] == channel1.id
+
+
+def test_get_channel_admin(client):
+    u1, pwd1 = generate_user()
+    u_admin, pwd_admin = generate_user("admin")
+    channel1 = generate_an_email_channel(u1.id)
+
+    token_admin = login(client, u_admin.email, pwd_admin)
+
+    r = client.get(
+        f"/channels/{channel1.id}",
+        headers={"Authorization": f"Bearer {token_admin}"},
+    )
+    assert r.status_code == status.HTTP_200_OK
+    data = r.json()
+    assert data["id"] == channel1.id
+
+    token1 = login(client, u1.email, pwd1)
+
+    r = client.get(
+        f"/channels/{channel1.id}",
+        headers={"Authorization": f"Bearer {token1}"},
+    )
+    assert r.status_code == status.HTTP_200_OK
+    data = r.json()
+    assert data["id"] == channel1.id
+
+
+# ------------------ #
+# ----- UPDATE ----- #
+# ------------------ #
 
 
 def test_update_channel(client):
@@ -285,6 +332,47 @@ def test_update_channel_ownership(client):
     assert data_before["port_url"] == EDIT_JSON_AUTHORIZED["port_url"]
 
 
+def test_update_channel_admin(client):
+    u1, pwd1 = generate_user()
+    u_admin, pwd_admin = generate_user("admin")
+    channel1 = generate_an_email_channel(u1.id)
+    EDIT_JSON_AUTHORIZED = {
+        "resource_url": "ok.com",
+        "port_url": 1234,
+    }
+    assert channel1.resource_url != EDIT_JSON_AUTHORIZED["resource_url"]
+    assert channel1.port_url != EDIT_JSON_AUTHORIZED["port_url"]
+
+    token_admin = login(client, u_admin.email, pwd_admin)
+
+    # Update
+    r = client.patch(
+        f"/channels/{channel1.id}",
+        headers={"Authorization": f"Bearer {token_admin}"},
+        json=EDIT_JSON_AUTHORIZED,
+    )
+    assert r.status_code == status.HTTP_200_OK
+    data_update = r.json()
+    assert data_update["id"] == channel1.id
+
+    token1 = login(client, u1.email, pwd1)
+    # Check updated
+    r = client.get(
+        f"/channels/{channel1.id}",
+        headers={"Authorization": f"Bearer {token1}"},
+    )
+    assert r.status_code == status.HTTP_200_OK
+    data_before = r.json()
+    assert data_before["id"] == channel1.id
+    assert data_before["resource_url"] == EDIT_JSON_AUTHORIZED["resource_url"]
+    assert data_before["port_url"] == EDIT_JSON_AUTHORIZED["port_url"]
+
+
+# ------------------ #
+# ----- DELETE ----- #
+# ------------------ #
+
+
 def test_delete_channel(client):
     user, pwd = generate_user()
     channel = generate_an_email_channel(user.id)
@@ -321,7 +409,7 @@ def test_delete_channel(client):
     assert r.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_delete_notification_ownership(client):
+def test_delete_channel_ownership(client):
     u1, pwd1 = generate_user()
     u2, pwd2 = generate_user()
     channel1 = generate_an_email_channel(u1.id)
@@ -352,6 +440,30 @@ def test_delete_notification_ownership(client):
         headers={"Authorization": f"Bearer {token1}"},
     )
     assert r.status_code == status.HTTP_204_NO_CONTENT
+
+    # Check deleted
+    r = client.get(
+        f"/channels/{channel1.id}",
+        headers={"Authorization": f"Bearer {token1}"},
+    )
+    assert r.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_delete_channel_admin(client):
+    u1, pwd1 = generate_user()
+    u_admin, pwd_admin = generate_user("admin")
+    channel1 = generate_an_email_channel(u1.id)
+
+    token_admin = login(client, u_admin.email, pwd_admin)
+
+    # Try delete
+    r = client.delete(
+        f"/channels/{channel1.id}",
+        headers={"Authorization": f"Bearer {token_admin}"},
+    )
+    assert r.status_code == status.HTTP_204_NO_CONTENT
+
+    token1 = login(client, u1.email, pwd1)
 
     # Check deleted
     r = client.get(

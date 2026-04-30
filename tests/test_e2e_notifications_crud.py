@@ -13,6 +13,11 @@ from db_data import (
 from auth import login
 
 
+# ------------------ #
+# ----- CREATE ----- #
+# ------------------ #
+
+
 def test_create_notification(client):
     user, pwd = generate_user()
     channel = generate_an_email_channel(user.id)
@@ -60,6 +65,11 @@ def test_create_notification(client):
     assert isinstance(data_after, list)
     assert len(data_after) == 1
     assert data_after[0]["id"] == new_notif_id
+
+
+# ------------------ #
+# ------ READ ------ #
+# ------------------ #
 
 
 def test_auth_get_notifications(client):
@@ -120,6 +130,12 @@ def test_get_notification(client):
     data = r.json()
     assert data["id"] == notification.id
 
+    r = client.get(
+        "/notifications/9999",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert r.status_code == status.HTTP_404_NOT_FOUND
+
 
 def test_get_notifications_ownership(client):
     u1, pwd1 = generate_user()
@@ -179,6 +195,56 @@ def test_get_notification_ownership(client):
         headers={"Authorization": f"Bearer {token2}"},
     )
     assert r.status_code == status.HTTP_404_NOT_FOUND
+
+    # User 1 login
+    token1 = login(client, u1.email, pwd1)
+
+    r = client.get(
+        f"/notifications/{notification.id}",
+        headers={"Authorization": f"Bearer {token1}"},
+    )
+    assert r.status_code == status.HTTP_200_OK
+    data = r.json()
+    assert data["id"] == notification.id
+
+
+def test_get_notification_admin(client):
+    u1, pwd1 = generate_user()
+    u_admin, pwd_admin = generate_user("admin")
+    channel = generate_an_email_channel(u1.id)
+    # Notification owned by User 1
+    notification = generate_notification(
+        u1.id,
+        channel.id,
+        channel.type,
+    )
+
+    # Admin user
+    token_admin = login(client, u_admin.email, pwd_admin)
+
+    r = client.get(
+        f"/notifications/{notification.id}",
+        headers={"Authorization": f"Bearer {token_admin}"},
+    )
+    assert r.status_code == status.HTTP_200_OK
+    data = r.json()
+    assert data["id"] == notification.id
+
+    # User 1
+    token1 = login(client, u1.email, pwd1)
+
+    r = client.get(
+        f"/notifications/{notification.id}",
+        headers={"Authorization": f"Bearer {token1}"},
+    )
+    assert r.status_code == status.HTTP_200_OK
+    data = r.json()
+    assert data["id"] == notification.id
+
+
+# ------------------ #
+# ----- UPDATE ----- #
+# ------------------ #
 
 
 def test_update_notification(client):
@@ -305,6 +371,54 @@ def test_update_notification_ownership(client):
     assert data_after["content"] == EDIT_JSON_AUTHORIZED["content"]
 
 
+def test_update_notification_admin(client):
+    u1, pwd1 = generate_user()
+    u_admin, pwd_admin = generate_user("admin")
+    channel = generate_an_email_channel(u1.id)
+    # Notification owned by User 1
+    notification = generate_notification(
+        u1.id,
+        channel.id,
+        channel.type,
+    )
+    EDIT_JSON_AUTHORIZED = {
+        "title": "My new title from the authorized account",
+        "content": "Modified content from the authorized account",
+    }
+    assert notification.title != EDIT_JSON_AUTHORIZED["title"]
+    assert notification.content != EDIT_JSON_AUTHORIZED["content"]
+
+    token_admin = login(client, u_admin.email, pwd_admin)
+
+    # Update
+    r = client.patch(
+        f"/notifications/{notification.id}",
+        headers={"Authorization": f"Bearer {token_admin}"},
+        json=EDIT_JSON_AUTHORIZED,
+    )
+    assert r.status_code == status.HTTP_200_OK
+    data_update = r.json()
+    assert data_update["id"] == notification.id
+
+    token1 = login(client, u1.email, pwd1)
+
+    # Check updated
+    r = client.get(
+        f"/notifications/{notification.id}",
+        headers={"Authorization": f"Bearer {token1}"},
+    )
+    assert r.status_code == status.HTTP_200_OK
+    data_after = r.json()
+    assert data_after["id"] == notification.id
+    assert data_after["title"] == EDIT_JSON_AUTHORIZED["title"]
+    assert data_after["content"] == EDIT_JSON_AUTHORIZED["content"]
+
+
+# ------------------ #
+# ----- DELETE ----- #
+# ------------------ #
+
+
 def test_delete_notification(client):
     user, pwd = generate_user()
     channel = generate_an_email_channel(user.id)
@@ -388,6 +502,36 @@ def test_delete_notification_ownership(client):
         headers={"Authorization": f"Bearer {token1}"},
     )
     assert r.status_code == status.HTTP_204_NO_CONTENT
+
+    # Check deleted
+    r = client.get(
+        f"/notifications/{notification.id}",
+        headers={"Authorization": f"Bearer {token1}"},
+    )
+    assert r.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_delete_notification_admin(client):
+    u1, pwd1 = generate_user()
+    u_admin, pwd_admin = generate_user("admin")
+    channel = generate_an_email_channel(u1.id)
+    # Notification owned by User 1
+    notification = generate_notification(
+        u1.id,
+        channel.id,
+        channel.type,
+    )
+
+    token_admin = login(client, u_admin.email, pwd_admin)
+
+    # Delete
+    r = client.delete(
+        f"/notifications/{notification.id}",
+        headers={"Authorization": f"Bearer {token_admin}"},
+    )
+    assert r.status_code == status.HTTP_204_NO_CONTENT
+
+    token1 = login(client, u1.email, pwd1)
 
     # Check deleted
     r = client.get(
