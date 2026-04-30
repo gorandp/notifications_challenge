@@ -33,7 +33,8 @@ async def create_notification(
     c = await c_serv.get_channel(channel_id=notification_data.channel_id)
     if not c:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Channel not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Channel not found",
         )
     n = Notification(
         user_id=current_user.id,
@@ -44,7 +45,17 @@ async def create_notification(
         title=notification_data.title,
         content=notification_data.content,
     )
-    return await n_serv.create_notification(n)
+    try:
+        await n_serv.validate_notification(n)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+    n_created = await n_serv.create_notification(n)
+    if notification_data.send_after_creating:
+        await n_serv.send_notification(n_created)
+    return n_created
 
 
 @router.get(
@@ -118,35 +129,24 @@ async def update_notification_partial(
             )
         channel_id = c.id
         channel_type = c.type
-    else:
-        channel_id = n.channel_id
-        channel_type = n.channel_type
 
-    n_status = notification_data.status if "status" in notification_data_u else n.status
-    recipient = (
-        notification_data.recipient
-        if "recipient" in notification_data_u
-        else n.recipient
-    )
-    title = notification_data.title if "title" in notification_data_u else n.title
-    content = (
-        notification_data.content if "content" in notification_data_u else n.content
-    )
+    for k, v in notification_data_u.items():
+        if k == "channel_id":
+            setattr(n, k, channel_id)
+            setattr(n, "channel_type", channel_type)
+        else:
+            setattr(n, k, v)
 
-    notification = Notification(
-        id=n.id,
-        user_id=n.user_id,
-        channel_id=channel_id,
-        channel_type=channel_type,
-        status=n_status,
-        recipient=recipient,
-        title=title,
-        content=content,
-        inserted_at=n.inserted_at,
-    )
+    try:
+        await n_serv.validate_notification(n)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
 
-    await n_serv.update_notification(notification_id, notification)
-    return notification
+    await n_serv.update_notification(notification_id, n)
+    return n
 
 
 @router.delete(

@@ -13,13 +13,20 @@ class IChannelStrategy(ABC):
         pass
 
     @abstractmethod
-    async def connect(self):
+    async def _connect(self):
         """Stablish connection"""
 
     @abstractmethod
-    async def close(self):
+    async def _close(self):
         """Close connection"""
 
     @abstractmethod
     async def send(self, notification: Notification):
-        """Send notification"""
+        """
+        Stablish connection, validates notification, sends it and
+        finally closes the connection
+        """
+
+    @abstractmethod
+    async def validate_notification(self, notification: Notification) -> None:
+        """Validate that the notification can be sent via this channel"""

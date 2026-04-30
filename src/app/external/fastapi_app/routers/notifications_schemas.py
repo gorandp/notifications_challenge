@@ -13,6 +13,8 @@ class NotificationBase(BaseModel):
 class NotificationCreate(NotificationBase):
     model_config = ConfigDict(from_attributes=True)
 
+    send_after_creating: bool = Field(default=True)
+
 
 class NotificationResponse(NotificationBase):
     model_config = ConfigDict(from_attributes=True)

@@ -3,6 +3,7 @@ from asyncio import sleep
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import re
 # from email.header import Header
 # from email.utils import formataddr
 
@@ -15,6 +16,9 @@ from app.interface.channel_strategies.email_mock_server import (
 )
 
 
+EMAIL_REGEX = re.compile(r"^[\w\d\._-]+(\+\w+)?@([\w-]+\.)+[\w-]{2,4}$")
+
+
 class EmailChannel(IChannelStrategy):
     strategy_type = ChannelType.EMAIL.value
 
@@ -23,7 +27,7 @@ class EmailChannel(IChannelStrategy):
         self.server = None
         self.logger = LoggerConfig.get_logger(__name__)
 
-    async def connect(self):
+    async def _connect(self):
         context = ssl.create_default_context()
         for _ in range(5):
             if self.channel.resource_url == SMTP_DEBUG_SERVER:
@@ -65,7 +69,7 @@ class EmailChannel(IChannelStrategy):
         #     )
         # )
 
-    async def close(self):
+    async def _close(self):
         if self.server is None:
             return
         try:
@@ -74,6 +78,8 @@ class EmailChannel(IChannelStrategy):
             self.logger.error(f"Unknown error | {type(e).__name__}: {e}")
 
     async def send(self, notification):
+        await self._connect()
+        await self.validate_notification(notification)
         message = self._build_message_(
             notification.title,
             notification.content,
@@ -95,6 +101,7 @@ class EmailChannel(IChannelStrategy):
             await sleep(30)
         else:
             raise RuntimeError("Can't send email")
+        await self._close()
 
     def _build_message_(
         subject: str,
@@ -133,3 +140,13 @@ class EmailChannel(IChannelStrategy):
         message.attach(part2)
 
         return message
+
+    async def validate_notification(self, notification):
+        if len(notification.title) > 900:
+            raise ValueError("Title is too long")
+        if len(notification.recipient) > 320:
+            raise ValueError("Recipient lenght is too long")
+        if not EMAIL_REGEX.match(notification.recipient):
+            raise ValueError("Recipient email format is not valid")
+        if notification.channel_type != self.strategy_type:
+            raise ValueError("Wrong channel")

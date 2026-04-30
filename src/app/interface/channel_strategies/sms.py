@@ -8,11 +8,14 @@ class SmsChannel(IChannelStrategy):
     def __init__(self, channel):
         self.channel = channel
 
-    async def connect(self):
+    async def _connect(self):
         pass
 
-    async def close(self):
+    async def _close(self):
         pass
 
     async def send(self, notification):
+        pass
+
+    async def validate_notification(self, notification):
         pass
