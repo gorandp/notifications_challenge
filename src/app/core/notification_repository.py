@@ -37,5 +37,13 @@ class INotificationRepository(ABC):
         """Update an existent notification"""
 
     @abstractmethod
+    async def update_status(
+        self,
+        notification_id: int,
+        notification_status: int,
+    ) -> None:
+        """Update notification status"""
+
+    @abstractmethod
     async def delete(self, notification_id: int):
         """Delete a notification"""

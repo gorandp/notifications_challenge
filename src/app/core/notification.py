@@ -5,8 +5,10 @@ from enum import IntEnum
 
 class NotifStatus(IntEnum):
     PENDING = 0
-    SENT = 1
-    SUCCESS = 2
+    SENDING = 100
+    SENT = 200
+    SUCCESS = 201
+    ERROR = 500
 
 
 @dataclass

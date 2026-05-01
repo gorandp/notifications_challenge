@@ -1,3 +1,6 @@
+from datetime import datetime, UTC
+
+from app.core.notification import NotifStatus
 from app.core.notification_repository import INotificationRepository
 
 
@@ -17,6 +20,13 @@ class NotificationRepository(INotificationRepository):
 
     async def update(self, notification_id, notification):
         return await self.db.update_notification(notification_id, notification)
+
+    async def update_status(self, notification_id, notification_status):
+        n = await self.get_by_id(notification_id)
+        n.status = notification_status
+        # if notification_status == NotifStatus.SENT.value:
+        #     n.sent_at = datetime.now(UTC)
+        return await self.db.update_notification(notification_id, n)
 
     async def delete(self, notification_id):
         return await self.db.delete_notification(notification_id)

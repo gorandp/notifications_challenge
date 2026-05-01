@@ -1,3 +1,4 @@
+from app.core.notification import NotifStatus
 from app.core.notification_service import INotificationService
 
 from .channel_strategies import CHANNEL_STRATEGIES
@@ -38,4 +39,13 @@ class NotificationService(INotificationService):
                 f"Channel type '{notification.channel_type}' "
                 + "doesn't have a strategy defined"
             )
-        return await c_strategy.send(notification)
+        self.repository.update_status(notification.id, NotifStatus.SENDING.value)
+        try:
+            await c_strategy.send(notification)
+        except Exception:
+            self.repository.update_status(
+                notification.id,
+                NotifStatus.ERROR.value,
+            )
+        else:
+            self.repository.update_status(notification.id, NotifStatus.SENT.value)
