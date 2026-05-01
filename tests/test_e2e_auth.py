@@ -7,6 +7,8 @@ from fastapi import status
 from db_data import generate_user
 from auth import login
 
+from src.app.external.fastapi_app.routers.auth import EMAIL_REGEX
+
 
 def test_unauthenticated(client):
     r = client.get("/testAuth")
@@ -82,3 +84,25 @@ def test_register(client):
 
     token_new = login(client, NEW_USER["username"], NEW_USER["password"])
     assert isinstance(token_new, str)
+
+
+def test_email_regex_for_register():
+    valid_emails = [
+        "john_smith@test.com",
+        "john.smith@test.com",
+        "john@test.com",
+        "john@test.com.ar",
+        "john123@test.com",
+        "john123.asd@test.com",
+        "john-123.asd@test.com",
+    ]
+    for e in valid_emails:
+        assert EMAIL_REGEX.match(e) is not None
+    not_valid_emails = [
+        "johnsmith",
+        "john\\smith@test.com",
+        "john#~smith@test.com",
+        "john+smith@test.com",
+    ]
+    for e in not_valid_emails:
+        assert EMAIL_REGEX.match(e) is None

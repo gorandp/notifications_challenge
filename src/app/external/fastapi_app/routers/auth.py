@@ -1,5 +1,6 @@
 from datetime import timedelta
 from typing import Annotated
+import re
 
 from fastapi import APIRouter, Request, HTTPException, status, Depends
 # from fastapi.security import OAuth2PasswordRequestForm
@@ -22,6 +23,8 @@ from ..auth import (
 
 router = APIRouter()
 logger = LogWrapper("auth").logger
+# same as channel strategy but tags are disabled
+EMAIL_REGEX = re.compile(r"^[\w\d\._-]+@([\w-]+\.)+[\w-]{2,4}$")
 
 
 @router.post(
@@ -95,6 +98,11 @@ async def register(
     credentials: schemas.AuthRegister,
     u_serv: Annotated[UserService, Depends(get_user_service)],
 ):
+    if not EMAIL_REGEX.match(credentials.username):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid email",
+        )
     u = await u_serv.get_user_by_email(credentials.username)
     if u:
         raise HTTPException(
