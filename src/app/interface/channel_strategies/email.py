@@ -141,12 +141,13 @@ class EmailChannel(IChannelStrategy):
 
         return message
 
-    async def validate_notification(self, notification):
+    @classmethod
+    def validate_notification(cls, notification):
         if len(notification.title) > 900:
             raise ValueError("Title is too long")
         if len(notification.recipient) > 320:
             raise ValueError("Recipient lenght is too long")
         if not EMAIL_REGEX.match(notification.recipient):
             raise ValueError("Recipient email format is not valid")
-        if notification.channel_type != self.strategy_type:
+        if notification.channel_type != cls.strategy_type:
             raise ValueError("Wrong channel")

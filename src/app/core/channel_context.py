@@ -18,6 +18,14 @@ class IChannelContext(ABC):
         pass
 
     @abstractmethod
+    def validate_notification(self, notification: Notification) -> None:
+        """Check if a notification is valid for the channel selected
+
+        Args:
+            notification (Notification): Notification to validate
+        """
+
+    @abstractmethod
     async def send(self, channel: Channel, notification: Notification) -> None:
         """Send a notification through the selected channel
 
@@ -25,4 +33,3 @@ class IChannelContext(ABC):
             channel (Channel): Selected channel
             notification (Notification): Notification to send
         """
-        pass

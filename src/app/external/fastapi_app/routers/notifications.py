@@ -46,8 +46,9 @@ async def create_notification(
         title=notification_data.title,
         content=notification_data.content,
     )
+    channel_ctx = ChannelContext(n_serv)
     try:
-        await n_serv.validate_notification(n)
+        channel_ctx.validate_notification(n)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -142,8 +143,9 @@ async def update_notification_partial(
         else:
             setattr(n, k, v)
 
+    channel_ctx = ChannelContext(n_serv)
     try:
-        await n_serv.validate_notification(n)
+        channel_ctx.validate_notification(n)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

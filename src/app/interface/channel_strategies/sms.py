@@ -22,7 +22,8 @@ class SmsChannel(IChannelStrategy):
     async def send(self, notification):
         pass
 
-    async def validate_notification(self, notification):
+    @classmethod
+    def validate_notification(cls, notification):
         if len(notification.content) > 160:
             raise ValueError("Content should be less than 160 characters")
         if not PHONE_NUMBER_REGEX.match(notification.recipient):

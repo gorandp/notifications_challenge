@@ -48,7 +48,3 @@ class INotificationService(ABC):
     @abstractmethod
     async def delete_notification(self, notification_id: int) -> None:
         pass
-
-    @abstractmethod
-    async def validate_notification(self, notification: Notification):
-        pass

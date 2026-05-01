@@ -16,6 +16,15 @@ class ChannelContext(IChannelContext):
             )
         return c_strategy_class(channel)
 
+    def validate_notification(self, notification):
+        c_strategy_class = CHANNEL_STRATEGIES.get(notification.channel_type)
+        if not c_strategy_class:
+            raise ValueError(
+                f"Channel type '{notification.channel_type}' "
+                + "doesn't have a strategy defined"
+            )
+        c_strategy_class.validate_notification(notification)
+
     async def send(self, channel, notification):
         strategy = self.get_strategy(channel)
         await self.n_serv.update_notification_status(

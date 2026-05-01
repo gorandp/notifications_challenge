@@ -27,6 +27,7 @@ class IChannelStrategy(ABC):
         finally closes the connection
         """
 
+    @classmethod
     @abstractmethod
-    async def validate_notification(self, notification: Notification) -> None:
-        """Validate that the notification can be sent via this channel"""
+    def validate_notification(cls, notification: Notification) -> None:
+        """Validate that the notification can be sent via this channel type"""

@@ -17,5 +17,6 @@ class PushChannel(IChannelStrategy):
     async def send(self, notification):
         pass
 
-    async def validate_notification(self, notification):
+    @classmethod
+    def validate_notification(cls, notification):
         pass
