@@ -22,3 +22,5 @@ class Notification:
     title: str = ""
     content: str = ""
     inserted_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+    sent_at: datetime | None = None

@@ -74,5 +74,13 @@ class NotificationModel(Base):
         DateTime,
         default=lambda: datetime.now(UTC),
     )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=lambda: datetime.now(UTC),
+    )
+    sent_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=True,
+    )
 
     user: Mapped[UserModel] = relationship(back_populates="notifications")

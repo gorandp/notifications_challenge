@@ -62,4 +62,6 @@ def load_notification_from_db_model(n: NotificationModel | None):
         title=n.title,
         content=n.content,
         inserted_at=n.inserted_at,
+        updated_at=n.updated_at,
+        sent_at=n.sent_at,
     )

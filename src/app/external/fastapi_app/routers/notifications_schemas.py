@@ -23,6 +23,8 @@ class NotificationResponse(NotificationBase):
     user_id: int = Field()
     channel_type: str = Field(max_length=16)
     inserted_at: datetime = Field()
+    updated_at: datetime = Field()
+    sent_at: datetime | None = Field(default=None)
 
 
 class NotificationUpdate(BaseModel):
