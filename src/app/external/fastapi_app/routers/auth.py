@@ -5,6 +5,7 @@ from fastapi import APIRouter, Request, HTTPException, status, Depends
 # from fastapi.security import OAuth2PasswordRequestForm
 
 from app.core.logger import LogWrapper
+from app.core.user import User
 from app.interface.user_service import UserService
 from app.external.fastapi_app.context import get_user_service
 from . import auth_schemas as schemas
@@ -12,7 +13,7 @@ from ..auth_dep import CurrentUser
 from ..config import JWTConfig
 from ..auth import (
     # oauth2_scheme,
-    # hash_password,
+    hash_password,
     verify_password,
     create_access_token,
     # verify_access_token,
@@ -84,3 +85,26 @@ async def test_authentication(
         "current_user_id": current_user.id,
         "success": True,
     }
+
+
+@router.post(
+    "/register",
+    status_code=status.HTTP_201_CREATED,
+)
+async def register(
+    credentials: schemas.AuthRegister,
+    u_serv: Annotated[UserService, Depends(get_user_service)],
+):
+    u = await u_serv.get_user_by_email(credentials.username)
+    if u:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User already exists",
+        )
+    user = User(
+        email=credentials.username,
+        password_hash=hash_password(credentials.password),
+        enabled=True,
+        role="basic",
+    )
+    await u_serv.create_user(user)
