@@ -1,5 +1,10 @@
+import re
+
 from app.core.channel import ChannelType
 from app.core.channel_strategy import IChannelStrategy
+
+
+PHONE_NUMBER_REGEX = re.compile(r"\d{1,3}_\d{1}_\d{10}")
 
 
 class SmsChannel(IChannelStrategy):
@@ -18,4 +23,7 @@ class SmsChannel(IChannelStrategy):
         pass
 
     async def validate_notification(self, notification):
-        pass
+        if len(notification.content) > 160:
+            raise ValueError("Content should be less than 160 characters")
+        if not PHONE_NUMBER_REGEX.match(notification.recipient):
+            raise ValueError("Recipient must have a valid phone number")
