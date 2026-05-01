@@ -4,6 +4,7 @@ from app.core.notification import NotifStatus
 from app.external.fastapi_app.context import db_session
 from app.external.database import database_models as models
 from app.external.fastapi_app.auth import hash_password
+from app.interface.channel_strategies.email_mock_server import SMTP_DEBUG_SERVER
 
 
 def generate_user(role="basic"):
@@ -42,7 +43,7 @@ def generate_an_email_channel(user_id: int) -> models.ChannelModel:
         type="email",
         credential_user="username",
         credential_pass="userpassword",
-        resource_url="smtp.gmail.com",
+        resource_url=SMTP_DEBUG_SERVER,
         port_url=587,
     )
     db.add(new_channel)
