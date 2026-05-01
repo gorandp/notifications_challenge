@@ -27,6 +27,7 @@ def test_create_notification(client):
         "title": "Test Notification",
         "content": "Test Content",
         "recipient": "recipient@example.com",
+        "send_after_creating": False,
     }
 
     r = client.post("/notifications", json=JSON_BODY)
