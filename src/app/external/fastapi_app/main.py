@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 
-from app.core.logger import LogWrapper
 from .routers import auth, users, notifications, channels, settings
 
 
@@ -30,8 +29,6 @@ app.include_router(
     prefix="/settings",
     tags=["Settings"],
 )
-
-logger = LogWrapper("main").logger
 
 
 @app.get("/hello", tags=["Initial Test"])
