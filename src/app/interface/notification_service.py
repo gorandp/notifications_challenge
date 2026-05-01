@@ -20,6 +20,16 @@ class NotificationService(INotificationService):
     async def update_notification(self, notification_id, notification):
         return await self.repository.update(notification_id, notification)
 
+    async def update_notification_status(
+        self,
+        notification_id,
+        notification_status,
+    ):
+        return await self.repository.update_status(
+            notification_id,
+            notification_status,
+        )
+
     async def delete_notification(self, notification_id):
         return await self.repository.delete(notification_id)
 
@@ -31,21 +41,3 @@ class NotificationService(INotificationService):
                 + "doesn't have a strategy defined"
             )
         return await c_strategy.validate_notification(notification)
-
-    async def send_notification(self, notification):
-        c_strategy = CHANNEL_STRATEGIES.get(notification.channel_type)
-        if not c_strategy:
-            raise ValueError(
-                f"Channel type '{notification.channel_type}' "
-                + "doesn't have a strategy defined"
-            )
-        self.repository.update_status(notification.id, NotifStatus.SENDING.value)
-        try:
-            await c_strategy.send(notification)
-        except Exception:
-            self.repository.update_status(
-                notification.id,
-                NotifStatus.ERROR.value,
-            )
-        else:
-            self.repository.update_status(notification.id, NotifStatus.SENT.value)

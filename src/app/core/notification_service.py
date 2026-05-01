@@ -12,7 +12,10 @@ class INotificationService(ABC):
         pass
 
     @abstractmethod
-    async def create_notification(self, notification: Notification) -> Notification:
+    async def create_notification(
+        self,
+        notification: Notification,
+    ) -> Notification:
         pass
 
     @abstractmethod
@@ -20,13 +23,26 @@ class INotificationService(ABC):
         pass
 
     @abstractmethod
-    async def get_all_notifications_from_user(self, user_id: int) -> list[Notification]:
+    async def get_all_notifications_from_user(
+        self,
+        user_id: int,
+    ) -> list[Notification]:
         pass
 
     @abstractmethod
     async def update_notification(
-        self, notification_id: int, notification: Notification
+        self,
+        notification_id: int,
+        notification: Notification,
     ) -> None:
+        pass
+
+    @abstractmethod
+    async def update_notification_status(
+        self,
+        notification_id: int,
+        notification_status: int,
+    ):
         pass
 
     @abstractmethod
@@ -35,8 +51,4 @@ class INotificationService(ABC):
 
     @abstractmethod
     async def validate_notification(self, notification: Notification):
-        pass
-
-    @abstractmethod
-    async def send_notification(self, notification: Notification):
         pass

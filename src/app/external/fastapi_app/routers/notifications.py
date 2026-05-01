@@ -7,6 +7,7 @@ from app.core.user import ROLES as USER_ROLES
 from app.core.notification import Notification
 from app.interface.channel_service import ChannelService
 from app.interface.notification_service import NotificationService
+from app.interface.channel_context import ChannelContext
 from app.external.fastapi_app.context import (
     get_notification_service,
     get_channel_service,
@@ -54,7 +55,11 @@ async def create_notification(
         )
     n_created = await n_serv.create_notification(n)
     if notification_data.send_after_creating:
-        await n_serv.send_notification(n_created)
+        try:
+            channel_ctx = ChannelContext(n_serv)
+            await channel_ctx.send(c, n_created)
+        except Exception:
+            pass
     return n_created
 
 
@@ -167,3 +172,37 @@ async def delete_notification(
             detail="Notification not found",
         )
     await n_serv.delete_notification(notification_id)
+
+
+@router.post(
+    "/{notification_id}/send",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def send_notification(
+    current_user: CurrentUser,
+    notification_id: int,
+    n_serv: Annotated[NotificationService, Depends(get_notification_service)],
+    c_serv: Annotated[ChannelService, Depends(get_channel_service)],
+):
+    n = await n_serv.get_notification(notification_id)
+    if not n or (
+        n.user_id != current_user.id and current_user.role != USER_ROLES.ADMIN
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Notification not found",
+        )
+    try:
+        channel = c_serv.get_channel(channel_id=n.channel_id)
+        if not channel:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Channel not found",
+            )
+        channel_ctx = ChannelContext(n_serv)
+        await channel_ctx.send(channel, n)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed sending notification",
+        )
