@@ -12,7 +12,7 @@ from db_data import (
 from auth import login
 
 
-def create_notification_and_send(client):
+def test_create_notification_and_send(client):
     user, pwd = generate_user()
     channel = generate_an_email_channel(user.id)
     JSON_BODY = {
@@ -50,7 +50,7 @@ def create_notification_and_send(client):
     assert "sent_at" in data_after[0]
 
 
-def send_already_created_notification(client):
+def test_send_already_created_notification(client):
     user, pwd = generate_user()
     channel = generate_an_email_channel(user.id)
     notification = generate_notification(user.id, channel.id, channel.type)
