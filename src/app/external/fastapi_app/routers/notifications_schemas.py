@@ -1,10 +1,12 @@
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.core.notification import NotifStatus
+
 
 class NotificationBase(BaseModel):
     channel_id: int = Field()
-    status: int = Field()
+    status: int = Field(default=NotifStatus.PENDING.value)
     title: str = Field(max_length=512)
     content: str = Field(max_length=16384)
     recipient: str = Field(max_length=512)
