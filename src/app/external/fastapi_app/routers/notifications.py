@@ -195,7 +195,7 @@ async def send_notification(
             detail="Notification not found",
         )
     try:
-        channel = c_serv.get_channel(channel_id=n.channel_id)
+        channel = await c_serv.get_channel(channel_id=n.channel_id)
         if not channel:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,

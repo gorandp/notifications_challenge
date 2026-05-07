@@ -79,7 +79,7 @@ class EmailChannel(IChannelStrategy):
 
     async def send(self, notification):
         await self._connect()
-        await self.validate_notification(notification)
+        self.validate_notification(notification)
         message = self._build_message_(
             notification.title,
             notification.content,
@@ -104,6 +104,7 @@ class EmailChannel(IChannelStrategy):
         await self._close()
 
     def _build_message_(
+        self,
         subject: str,
         content: str,
         email_from: str,

@@ -71,7 +71,7 @@ def test_send_already_created_notification(client):
         f"/notifications/{notification.id}/send",
         headers={"Authorization": f"Bearer {token}"},
     )
-    assert r.status_code == status.HTTP_200_OK
+    assert r.status_code == status.HTTP_204_NO_CONTENT
 
     # Check after send
     r = client.get(
