@@ -33,6 +33,7 @@ async def create_channel(
         credential_pass=channel_data.credential_pass,
         resource_url=channel_data.resource_url,
         port_url=channel_data.port_url,
+        sender_name=channel_data.sender_name,
     )
     return await c_serv.create_channel(c)
 

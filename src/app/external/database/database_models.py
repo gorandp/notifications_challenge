@@ -47,6 +47,15 @@ class ChannelModel(Base):
     credential_pass: Mapped[str] = mapped_column(String(128))
     resource_url: Mapped[str] = mapped_column(String(128))
     port_url: Mapped[int] = mapped_column(Integer)
+    sender_name: Mapped[str] = mapped_column(String(128), nullable=True)
+    inserted_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=lambda: datetime.now(UTC),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=lambda: datetime.now(UTC),
+    )
 
     user: Mapped[UserModel] = relationship(back_populates="channels")
 

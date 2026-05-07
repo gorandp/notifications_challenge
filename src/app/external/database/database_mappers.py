@@ -42,6 +42,9 @@ def load_channel_from_db_model(c: ChannelModel | None):
         credential_pass=c.credential_pass,
         resource_url=c.resource_url,
         port_url=c.port_url,
+        sender_name=c.sender_name,
+        inserted_at=c.inserted_at,
+        updated_at=c.updated_at,
     )
 
 

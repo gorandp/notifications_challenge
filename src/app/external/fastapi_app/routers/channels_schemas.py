@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -5,6 +6,7 @@ class ChannelBase(BaseModel):
     type: str = Field(max_length=16)
     resource_url: str = Field(max_length=128)
     port_url: int = Field()
+    sender_name: str | None = Field(default=None, max_length=128)
 
 
 class ChannelCreate(ChannelBase):
@@ -19,6 +21,8 @@ class ChannelResponse(ChannelBase):
 
     id: int = Field()
     user_id: int = Field()
+    inserted_at: datetime = Field()
+    updated_at: datetime = Field()
 
 
 class ChannelUpdate(BaseModel):
@@ -27,3 +31,4 @@ class ChannelUpdate(BaseModel):
     port_url: int | None = Field(default=None)
     credential_user: str | None = Field(default=None, max_length=128)
     credential_pass: str | None = Field(default=None, max_length=128)
+    sender_name: str | None = Field(default=None, max_length=128)
