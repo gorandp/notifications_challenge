@@ -10,14 +10,14 @@ on:
       - "src/**"
       - "tests/**"
       - "pyproject.toml"
-      - ".vscode/workflows/**"
+      - ".github/workflows/**"
   pull_request:
     branches: [ "main" ]
     paths:
       - "src/**"
       - "tests/**"
       - "pyproject.toml"
-      - ".vscode/workflows/**"
+      - ".github/workflows/**"
 
 permissions:
   contents: read
