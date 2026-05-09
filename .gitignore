@@ -68,5 +68,12 @@ python_modules/
 .venv/
 .venv-workers/
 
-# db for testing
+# Local DBs
+dev.db
 test.db
+
+# Coverage
+.coverage
+coverage.xml
+htmlcov/
+
