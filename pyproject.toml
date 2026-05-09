@@ -18,7 +18,11 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["workers-py", "workers-runtime-sdk"]
+dev = [
+    "fastapi[standard]>=0.133.1",
+    "workers-py",
+    "workers-runtime-sdk",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
