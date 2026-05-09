@@ -1,4 +1,4 @@
-from src.app.interface.channel_strategies.sms import PHONE_NUMBER_REGEX
+from app.interface.channel_strategies.sms import PHONE_NUMBER_REGEX
 
 
 def test_regex():

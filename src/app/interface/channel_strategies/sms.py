@@ -4,7 +4,7 @@ from app.core.channel import ChannelType
 from app.core.channel_strategy import IChannelStrategy
 
 
-PHONE_NUMBER_REGEX = re.compile(r"\d{1,3}_\d{1}_\d{10}")
+PHONE_NUMBER_REGEX = re.compile(r"^\d{1,3}_\d{1}_\d{10}$")
 
 
 class SmsChannel(IChannelStrategy):

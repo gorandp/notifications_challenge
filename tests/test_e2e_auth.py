@@ -7,7 +7,7 @@ from fastapi import status
 from db_data import generate_user
 from auth import login
 
-from src.app.external.fastapi_app.routers.auth import EMAIL_REGEX
+from app.external.fastapi_app.routers.auth import EMAIL_REGEX
 
 
 def test_unauthenticated(client):

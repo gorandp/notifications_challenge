@@ -1,4 +1,4 @@
-from src.app.interface.channel_strategies.email import EMAIL_REGEX
+from app.interface.channel_strategies.email import EMAIL_REGEX
 
 
 def test_regex():
