@@ -67,7 +67,10 @@ async def login(
     )
 
 
-@router.get("/me")
+@router.get(
+    "/me",
+    response_model=schemas.AuthMeResponse,
+)
 async def get_current_user(
     # token: Annotated[str, Depends(oauth2_scheme)],
     # db: Annotated[Session, Depends(get_db)],
