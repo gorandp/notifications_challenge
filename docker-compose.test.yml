@@ -1,0 +1,16 @@
+services:
+  app:
+    command: pytest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - JWT_SECRET=randomsecret12345678901234567890
+      - DB_CONNECTION_STRING=sqlite:////app/data/test.sqlite
+    volumes:
+      - sqlite_data:/app/data
+    ports:
+      - "8000:8000"
+
+volumes:
+  sqlite_data:

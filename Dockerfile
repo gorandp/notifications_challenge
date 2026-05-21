@@ -21,6 +21,8 @@ COPY . /app
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked
 
+# Add fastapi-cli
+RUN uv add fastapi-cli
 
 # Then, use a final image without uv
 FROM python:3.12-slim-bookworm
@@ -44,6 +46,10 @@ USER nonroot
 # Use `/app` as the working directory
 WORKDIR /app
 
+# Make dir for data volume
+# (TODO: remove this if sqlite is no longer used)
+RUN mkdir -p /app/data
+
 # Place executables in the environment at the front of the path
 ENV PATH="/app/.venv/bin:$PATH"
 
@@ -54,9 +60,5 @@ ENTRYPOINT []
 USER nonroot
 # Expose the FastAPI port
 EXPOSE 8000
-# Run the FastAPI application by default
-CMD ["fastapi", "run", "--host", "0.0.0.0", "src/app"]
-
-# Run FastAPI’s server
-
-# CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "tennis_club.wsgi:application"]
+# Run the FastAPI server
+# CMD ["fastapi", "run", "--host", "0.0.0.0", "src/main.py"]
