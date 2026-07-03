@@ -1,6 +1,6 @@
-import os
-
 from fastapi import Request
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
 from app.external.fastapi_app.main import app as app
 
 from app.core.logger import LoggerConfig
@@ -14,9 +14,21 @@ from app.external.database.database_models import Base as DatabaseBaseModel
 from app.external.fastapi_app.config import JWTConfig
 
 
-LoggerConfig.set_level(os.getenv("LOGGER_LEVEL", "INFO"))
-JWTConfig.set_secret(os.getenv("JWT_SECRET", "SECRET_NOT_SET_UNSECURE"))
-database = Database({"url": os.getenv("DB_CONNECTION_STRING", "sqlite:///./dev.db")})
+class Settings(BaseSettings):
+    DB_CONNECTION_STRING: str = "sqlite:///./dev.db"
+    JWT_SECRET: str = "SECRET_NOT_SET_UNSECURE"
+    LOGGER_LEVEL: str = "INFO"
+
+    # Tell Pydantic to read from a .env file
+    model_config = SettingsConfigDict(env_file=".env")
+
+
+settings = Settings()
+
+
+LoggerConfig.set_level(settings.LOGGER_LEVEL)
+JWTConfig.set_secret(settings.JWT_SECRET)
+database = Database({"url": settings.DB_CONNECTION_STRING})
 # Create tables if not exist
 DatabaseBaseModel.metadata.create_all(bind=database.engine)
 init_context(database)
