@@ -46,10 +46,6 @@ USER nonroot
 # Use `/app` as the working directory
 WORKDIR /app
 
-# Make dir for data volume
-# (TODO: remove this if sqlite is no longer used)
-RUN mkdir -p /app/data
-
 # Place executables in the environment at the front of the path
 ENV PATH="/app/.venv/bin:$PATH"
 

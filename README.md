@@ -12,10 +12,10 @@ and register a new account.
 If you want to see the API reference, go to https://notif-api.gorandp.com/docs
 
 - Backend: FastAPI
-- Hosting: Cloudflare Workers
 - Frontend: React ([repository](https://github.com/gorandp/notifications_challenge_front))
 - Testing: Pytest
 - Architecture: Clean architecture
+- Database: PostgreSQL
 
 
 ## Features
@@ -54,33 +54,22 @@ docker compose down
 ```
 
 
-## Run/test API locally
+## Run/test API locally (bare machine - no Docker)
 
 ### Pre-requisites
 
 - uv: https://docs.astral.sh/uv/getting-started/installation/#standalone-installer
 - (optional) nvm (to install Wrangler via npm): https://github.com/nvm-sh/nvm#installing-and-updating
 - Port free: 8000
+- PostgreSQL installed
 
 ### Run with FastAPI
 
 1. Run `uv sync` ([Don`t have uv? Install it from here](https://docs.astral.sh/uv/getting-started/installation/#standalone-installer))
 2. Create a `.env` file with the following variables
   - `JWT_SECRET` variable set to a random string
-  - `DB_CONNECTION_STRING` variable set to the location of the sqlite database, or leave it empty and will create a `dev.db` in the root dir (if you want to use the Cloudflare D1 local db, locate it in `.wrangler/state/v3/d1/miniflare-D1DatabaseObject/<LONGHASH>.sqlite`, which is created after running the API with pywrangler and doing at least 1 HTTP request to any API endpoint)
+  - `DB_CONNECTION_STRING` url of the postgresql database (postgresql+psycopg://user:password@localhost/notifdb)
 3. Run `uv run fastapi run src/main.py`
-
-You can visit the API at http://localhost:8000/docs
-
-### Run with Pywrangler
-
-To run it as it is in Cloudflare Workers.
-
-1. Run `uv sync`
-2. Run `npm install` (to install Wrangler)
-3. Create a `.env` file with the following variables
-  - `JWT_SECRET` variable set to a random string
-4. Run `npm run dev` or `uv run pywrangler dev`
 
 You can visit the API at http://localhost:8000/docs
 
@@ -100,17 +89,18 @@ pytest
 ## Techs
 
 - FastAPI
-- Cloudflare Workers
 - Docker
 - OpenAPI
+- PostgreSQL
 
 
 ## Decisions made
 
 - Clean architecture was chosen in order to be able to handler further changes in the future in a proper way. [Reference](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
-- SQLite database was chosen to be compatible with Cloudflare D1, but can be changed to a more robust SQL database in the future like PostgreSQL
 - Docker: To make it portable
 - Pytest/Testing/E2E: Pytest is one of the most used testing framework of Python as well as unittest, so it is easy to find fixes and people that know how to use it. E2E testing was done because it evaluates the whole chain of work in few tests, meaning it is more flexible to internal changes but enforces that the results are always the same.
+- PostgreSQL: Industry standard for most web applications. Handle concurrent connections well.
+- Alembic: Used to generate and run migrations, which ease the tracking of the schema changes over time and apply incremental changes safely.
 
 
 ## Route
