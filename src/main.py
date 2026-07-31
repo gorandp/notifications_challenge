@@ -29,8 +29,6 @@ settings = Settings()
 LoggerConfig.set_level(settings.LOGGER_LEVEL)
 JWTConfig.set_secret(settings.JWT_SECRET)
 database = Database({"url": settings.DB_CONNECTION_STRING})
-# Create tables if not exist
-DatabaseBaseModel.metadata.create_all(bind=database.engine)
 init_context(database)
 
 
