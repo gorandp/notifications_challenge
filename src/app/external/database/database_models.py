@@ -19,7 +19,7 @@ class UserModel(Base):
     enabled: Mapped[bool] = mapped_column(Boolean)
     role: Mapped[str] = mapped_column(String(16))
     created_at: Mapped[datetime] = mapped_column(
-        DateTime,
+        DateTime(timezone=True),
         default=lambda: datetime.now(UTC),
     )
 
@@ -49,11 +49,11 @@ class ChannelModel(Base):
     port_url: Mapped[int] = mapped_column(Integer)
     sender_name: Mapped[str] = mapped_column(String(128), nullable=True)
     inserted_at: Mapped[datetime] = mapped_column(
-        DateTime,
+        DateTime(timezone=True),
         default=lambda: datetime.now(UTC),
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime,
+        DateTime(timezone=True),
         default=lambda: datetime.now(UTC),
     )
 
@@ -80,15 +80,15 @@ class NotificationModel(Base):
     content: Mapped[str] = mapped_column(Text)
     recipient: Mapped[str] = mapped_column(String(512))
     inserted_at: Mapped[datetime] = mapped_column(
-        DateTime,
+        DateTime(timezone=True),
         default=lambda: datetime.now(UTC),
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime,
+        DateTime(timezone=True),
         default=lambda: datetime.now(UTC),
     )
     sent_at: Mapped[datetime] = mapped_column(
-        DateTime,
+        DateTime(timezone=True),
         nullable=True,
     )
 
