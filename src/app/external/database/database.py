@@ -17,7 +17,7 @@ from ..fastapi_app.context import db_session
 class Database(IDatabase):
     def __init__(self, connection_params):
         self.engine = create_async_engine(
-            connection_params.get("url"),
+            **connection_params,
         )
         self.async_session_local = async_sessionmaker(
             self.engine,
