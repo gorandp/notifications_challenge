@@ -1,8 +1,8 @@
-from fastapi.testclient import TestClient
+from httpx import AsyncClient
 
 
-def login(client: TestClient, username: str, pwd: str):
-    r = client.post(
+async def login(client: AsyncClient, username: str, pwd: str):
+    r = await client.post(
         "/token",
         data={
             "username": username,
