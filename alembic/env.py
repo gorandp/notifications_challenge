@@ -7,7 +7,10 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 
+# Used to load all models + use the Base model in target_metadata
 from src.app.external.database import database_models
+
+# Used to get database url
 from src.app.external.fastapi_app.main import env_settings
 
 
