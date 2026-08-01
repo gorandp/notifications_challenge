@@ -75,9 +75,10 @@ You can visit the API at http://localhost:8000/docs
 
 ### Test
 
-```sh
-pytest
-```
+1. Run `uv sync`
+2. Create a `.env` file with the following variable
+  - `DB_CONNECTION_STRING` url of the postgresql database (postgresql+psycopg://user_test:password_test@localhost/notifdb_test). It is suggested that the database name differs with the production database name.
+3. Run `uv run pytest`
 
 
 ## Areas to improve
