@@ -7,7 +7,7 @@ from app.external.fastapi_app.auth import hash_password
 from app.interface.channel_strategies.email_mock_server import SMTP_DEBUG_SERVER
 
 
-def generate_user(role="basic"):
+async def generate_user(role="basic"):
     """Create a test user
 
     Returns:
@@ -23,12 +23,12 @@ def generate_user(role="basic"):
         role=role,
     )
     db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+    await db.commit()
+    await db.refresh(new_user)
     return new_user, pwd
 
 
-def generate_an_email_channel(user_id: int) -> models.ChannelModel:
+async def generate_an_email_channel(user_id: int) -> models.ChannelModel:
     """Create a test email channel
 
     Args:
@@ -47,12 +47,12 @@ def generate_an_email_channel(user_id: int) -> models.ChannelModel:
         port_url=587,
     )
     db.add(new_channel)
-    db.commit()
-    db.refresh(new_channel)
+    await db.commit()
+    await db.refresh(new_channel)
     return new_channel
 
 
-def generate_a_sms_channel(user_id: int) -> models.ChannelModel:
+async def generate_a_sms_channel(user_id: int) -> models.ChannelModel:
     """Create a test SMS channel
 
     Args:
@@ -71,12 +71,12 @@ def generate_a_sms_channel(user_id: int) -> models.ChannelModel:
         port_url=999,  # not real
     )
     db.add(new_channel)
-    db.commit()
-    db.refresh(new_channel)
+    await db.commit()
+    await db.refresh(new_channel)
     return new_channel
 
 
-def generate_notification(
+async def generate_notification(
     user_id: int,
     channel_id: int,
     channel_type: str,
@@ -97,6 +97,6 @@ def generate_notification(
         recipient="testrecipient@example.com",
     )
     db.add(new_notification)
-    db.commit()
-    db.refresh(new_notification)
+    await db.commit()
+    await db.refresh(new_notification)
     return new_notification
