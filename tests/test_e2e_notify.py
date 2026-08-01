@@ -1,20 +1,22 @@
 # After creation, the notification will be sent via the selected channel
 # Channels: Email, SMS, Push notification, Telegram
 # Each channel requires a different sending logic
+import pytest
 from fastapi import status
 
 from app.core.notification import NotifStatus
-from db_data import (
+from tests.db_data import (
     generate_user,
     generate_notification,
     generate_an_email_channel,
 )
-from auth import login
+from tests.auth import login
 
 
-def test_create_notification_and_send(client):
-    user, pwd = generate_user()
-    channel = generate_an_email_channel(user.id)
+@pytest.mark.anyio
+async def test_create_notification_and_send(client):
+    user, pwd = await generate_user()
+    channel = await generate_an_email_channel(user.id)
     JSON_BODY = {
         "channel_id": channel.id,
         "title": "Test Notification",
@@ -23,10 +25,10 @@ def test_create_notification_and_send(client):
         "send_after_creating": True,
     }
 
-    token = login(client, user.email, pwd)
+    token = await login(client, user.email, pwd)
 
     # Create notification
-    r = client.post(
+    r = await client.post(
         "/notifications",
         headers={"Authorization": f"Bearer {token}"},
         json=JSON_BODY,
@@ -37,7 +39,7 @@ def test_create_notification_and_send(client):
     new_notif_id = data_create["id"]
 
     # Check created
-    r = client.get(
+    r = await client.get(
         "/notifications",
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -50,15 +52,16 @@ def test_create_notification_and_send(client):
     assert "sent_at" in data_after[0]
 
 
-def test_send_already_created_notification(client):
-    user, pwd = generate_user()
-    channel = generate_an_email_channel(user.id)
-    notification = generate_notification(user.id, channel.id, channel.type)
+@pytest.mark.anyio
+async def test_send_already_created_notification(client):
+    user, pwd = await generate_user()
+    channel = await generate_an_email_channel(user.id)
+    notification = await generate_notification(user.id, channel.id, channel.type)
 
-    token = login(client, user.email, pwd)
+    token = await login(client, user.email, pwd)
 
     # Check status
-    r = client.get(
+    r = await client.get(
         f"/notifications/{notification.id}",
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -67,14 +70,14 @@ def test_send_already_created_notification(client):
     assert data_before["status"] == NotifStatus.PENDING.value
     assert data_before.get("sent_at") is None
 
-    r = client.post(
+    r = await client.post(
         f"/notifications/{notification.id}/send",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert r.status_code == status.HTTP_204_NO_CONTENT
 
     # Check after send
-    r = client.get(
+    r = await client.get(
         f"/notifications/{notification.id}",
         headers={"Authorization": f"Bearer {token}"},
     )
