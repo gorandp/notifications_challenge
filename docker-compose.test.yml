@@ -20,6 +20,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        UV_NO_DEV: 0 # dev dependencies will be installed by uv
     environment:
       - JWT_SECRET=randomsecret12345678901234567890
       - DB_CONNECTION_STRING=postgresql+psycopg://notifuser_test:notifpass_test@postgres:5432/notifdb_test
