@@ -9,10 +9,6 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .routers import auth, users, notifications, channels, settings
-from app.external.fastapi_app.context import (
-    db_session,
-    database_ctx,
-)
 
 # from app.external.database.database_models import Base as DatabaseBaseModel
 from app.core.logger import LoggerConfig
@@ -84,16 +80,6 @@ app.include_router(
 @app.get("/hello", tags=["Initial Test"])
 async def home():
     return {"msg": "Hello World!"}
-
-
-@app.middleware("http")
-async def set_db_session(request: Request, call_next):
-    db = database_ctx.get()
-    async with db.async_session_local() as session:
-        token = db_session.set(session)
-        response = await call_next(request)
-        db_session.reset(token)
-    return response
 
 
 @app.exception_handler(StarletteHTTPException)
