@@ -1,16 +1,39 @@
 services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: notifuser
+      POSTGRES_PASSWORD: notifpass
+      POSTGRES_DB: notifdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U notifuser -d notifdb" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   app:
-    command: [ "fastapi", "run", "--host", "0.0.0.0", "src/main.py" ]
+    command: [ "fastapi", "run", "--reload", "--host", "0.0.0.0", "src/main.py" ]
+    # command: [ "fastapi", "run", "--host", "0.0.0.0", "src/main.py" ]
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        UV_NO_DEV: 1 # dev dependencies will not be installed by uv
     environment:
       - JWT_SECRET=randomsecret12345678901234567890
-      - DB_CONNECTION_STRING=sqlite:////app/data/dev.sqlite
+      - DB_CONNECTION_STRING=postgresql+psycopg://notifuser:notifpass@postgres:5432/notifdb
     volumes:
-      - sqlite_data:/app/data
+      - ./src:/app/src
+      - ./alembic:/app/alembic
+      # Mount other directories if needed, like static, templates, etc.
+      - ./src/static:/app/src/static
+      - ./src/templates:/app/src/templates
     ports:
       - "8000:8000"
 
 volumes:
-  sqlite_data:
+  postgres_data:

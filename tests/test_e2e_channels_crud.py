@@ -1,11 +1,12 @@
+import pytest
 from fastapi import status
 
-from db_data import (
+from tests.db_data import (
     generate_user,
     generate_an_email_channel,
     generate_a_sms_channel,
 )
-from auth import login
+from tests.auth import login
 
 
 # ------------------ #
@@ -13,8 +14,9 @@ from auth import login
 # ------------------ #
 
 
-def test_create_channel(client):
-    user, pwd = generate_user()
+@pytest.mark.anyio
+async def test_create_channel(client):
+    user, pwd = await generate_user()
     JSON_BODY = {
         "type": "email",
         "resource_url": "smtp.gmail.com",
@@ -23,13 +25,13 @@ def test_create_channel(client):
         "credential_pass": "mypassword",
     }
 
-    r = client.post("/channels", json=JSON_BODY)
+    r = await client.post("/channels", json=JSON_BODY)
     assert r.status_code == status.HTTP_401_UNAUTHORIZED
 
-    token = login(client, user.email, pwd)
+    token = await login(client, user.email, pwd)
 
     # Check unchanged
-    r = client.get(
+    r = await client.get(
         "/channels",
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -39,7 +41,7 @@ def test_create_channel(client):
     assert len(data_before) == 0
 
     # Create channel
-    r = client.post(
+    r = await client.post(
         "/channels",
         headers={"Authorization": f"Bearer {token}"},
         json=JSON_BODY,
@@ -50,7 +52,7 @@ def test_create_channel(client):
     new_channel_id = data_create["id"]
 
     # Check created
-    r = client.get(
+    r = await client.get(
         "/channels",
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -66,17 +68,18 @@ def test_create_channel(client):
 # ------------------ #
 
 
-def test_get_channels(client):
-    user, pwd = generate_user()
+@pytest.mark.anyio
+async def test_get_channels(client):
+    user, pwd = await generate_user()
 
     # Unauthenticated
-    r = client.get("/channels")
+    r = await client.get("/channels")
     assert r.status_code == status.HTTP_401_UNAUTHORIZED
 
-    token = login(client, user.email, pwd)
+    token = await login(client, user.email, pwd)
 
     # Authenticated
-    r = client.get(
+    r = await client.get(
         "/channels",
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -86,9 +89,9 @@ def test_get_channels(client):
     assert len(data) == 0
     assert data == []
 
-    channel_email = generate_an_email_channel(user.id)
+    channel_email = await generate_an_email_channel(user.id)
 
-    r = client.get(
+    r = await client.get(
         "/channels",
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -98,9 +101,9 @@ def test_get_channels(client):
     assert len(data) == 1
     assert data[0]["id"] == channel_email.id
 
-    channel_sms = generate_a_sms_channel(user.id)
+    channel_sms = await generate_a_sms_channel(user.id)
 
-    r = client.get(
+    r = await client.get(
         "/channels",
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -113,13 +116,14 @@ def test_get_channels(client):
     assert all_ids == all_ids_db
 
 
-def test_get_channel(client):
-    user, pwd = generate_user()
-    channel = generate_an_email_channel(user.id)
+@pytest.mark.anyio
+async def test_get_channel(client):
+    user, pwd = await generate_user()
+    channel = await generate_an_email_channel(user.id)
 
-    token = login(client, user.email, pwd)
+    token = await login(client, user.email, pwd)
 
-    r = client.get(
+    r = await client.get(
         f"/channels/{channel.id}",
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -127,21 +131,22 @@ def test_get_channel(client):
     data = r.json()
     assert data["id"] == channel.id
 
-    r = client.get(
+    r = await client.get(
         "/channels/9999",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert r.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_get_channels_ownership(client):
-    u1, pwd1 = generate_user()
-    u2, pwd2 = generate_user()
-    channel1 = generate_an_email_channel(u1.id)
+@pytest.mark.anyio
+async def test_get_channels_ownership(client):
+    u1, pwd1 = await generate_user()
+    u2, pwd2 = await generate_user()
+    channel1 = await generate_an_email_channel(u1.id)
 
-    token1 = login(client, u1.email, pwd1)
+    token1 = await login(client, u1.email, pwd1)
 
-    r = client.get(
+    r = await client.get(
         "/channels",
         headers={"Authorization": f"Bearer {token1}"},
     )
@@ -150,9 +155,9 @@ def test_get_channels_ownership(client):
     assert len(data) == 1
     assert data[0]["id"] == channel1.id
 
-    token2 = login(client, u2.email, pwd2)
+    token2 = await login(client, u2.email, pwd2)
 
-    r = client.get(
+    r = await client.get(
         "/channels",
         headers={"Authorization": f"Bearer {token2}"},
     )
@@ -161,22 +166,23 @@ def test_get_channels_ownership(client):
     assert len(data) == 0
 
 
-def test_get_channel_ownership(client):
-    u1, pwd1 = generate_user()
-    u2, pwd2 = generate_user()
-    channel1 = generate_an_email_channel(u1.id)
+@pytest.mark.anyio
+async def test_get_channel_ownership(client):
+    u1, pwd1 = await generate_user()
+    u2, pwd2 = await generate_user()
+    channel1 = await generate_an_email_channel(u1.id)
 
-    token2 = login(client, u2.email, pwd2)
+    token2 = await login(client, u2.email, pwd2)
 
-    r = client.get(
+    r = await client.get(
         f"/channels/{channel1.id}",
         headers={"Authorization": f"Bearer {token2}"},
     )
     assert r.status_code == status.HTTP_404_NOT_FOUND
 
-    token1 = login(client, u1.email, pwd1)
+    token1 = await login(client, u1.email, pwd1)
 
-    r = client.get(
+    r = await client.get(
         f"/channels/{channel1.id}",
         headers={"Authorization": f"Bearer {token1}"},
     )
@@ -185,14 +191,15 @@ def test_get_channel_ownership(client):
     assert data["id"] == channel1.id
 
 
-def test_get_channel_admin(client):
-    u1, pwd1 = generate_user()
-    u_admin, pwd_admin = generate_user("admin")
-    channel1 = generate_an_email_channel(u1.id)
+@pytest.mark.anyio
+async def test_get_channel_admin(client):
+    u1, pwd1 = await generate_user()
+    u_admin, pwd_admin = await generate_user("admin")
+    channel1 = await generate_an_email_channel(u1.id)
 
-    token_admin = login(client, u_admin.email, pwd_admin)
+    token_admin = await login(client, u_admin.email, pwd_admin)
 
-    r = client.get(
+    r = await client.get(
         f"/channels/{channel1.id}",
         headers={"Authorization": f"Bearer {token_admin}"},
     )
@@ -200,9 +207,9 @@ def test_get_channel_admin(client):
     data = r.json()
     assert data["id"] == channel1.id
 
-    token1 = login(client, u1.email, pwd1)
+    token1 = await login(client, u1.email, pwd1)
 
-    r = client.get(
+    r = await client.get(
         f"/channels/{channel1.id}",
         headers={"Authorization": f"Bearer {token1}"},
     )
@@ -216,9 +223,10 @@ def test_get_channel_admin(client):
 # ------------------ #
 
 
-def test_update_channel(client):
-    user, pwd = generate_user()
-    channel = generate_an_email_channel(user.id)
+@pytest.mark.anyio
+async def test_update_channel(client):
+    user, pwd = await generate_user()
+    channel = await generate_an_email_channel(user.id)
     EDIT_JSON = {
         "resource_url": "my-new-email-resource.com",
         "port_url": 999,
@@ -227,16 +235,16 @@ def test_update_channel(client):
     assert channel.port_url != EDIT_JSON["port_url"]
 
     # Not authenticated
-    r = client.patch(
+    r = await client.patch(
         f"/channels/{channel.id}",
         json=EDIT_JSON,
     )
     assert r.status_code == status.HTTP_401_UNAUTHORIZED
 
-    token = login(client, user.email, pwd)
+    token = await login(client, user.email, pwd)
 
     # Check returned data
-    r = client.get(
+    r = await client.get(
         f"/channels/{channel.id}",
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -250,7 +258,7 @@ def test_update_channel(client):
     assert "credential_pass" not in data_before
 
     # Update
-    r = client.patch(
+    r = await client.patch(
         f"/channels/{channel.id}",
         headers={"Authorization": f"Bearer {token}"},
         json=EDIT_JSON,
@@ -260,7 +268,7 @@ def test_update_channel(client):
     assert data_update["id"] == channel.id
 
     # Check updated
-    r = client.get(
+    r = await client.get(
         f"/channels/{channel.id}",
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -271,10 +279,11 @@ def test_update_channel(client):
     assert data_after["port_url"] == EDIT_JSON["port_url"]
 
 
-def test_update_channel_ownership(client):
-    u1, pwd1 = generate_user()
-    u2, pwd2 = generate_user()
-    channel1 = generate_an_email_channel(u1.id)
+@pytest.mark.anyio
+async def test_update_channel_ownership(client):
+    u1, pwd1 = await generate_user()
+    u2, pwd2 = await generate_user()
+    channel1 = await generate_an_email_channel(u1.id)
     EDIT_JSON_NOT_AUTHORIZED = {
         "resource_url": "not-authorized-new-url.com",
         "port_url": 1,
@@ -288,19 +297,19 @@ def test_update_channel_ownership(client):
     assert channel1.resource_url != EDIT_JSON_AUTHORIZED["resource_url"]
     assert channel1.port_url != EDIT_JSON_AUTHORIZED["port_url"]
 
-    token2 = login(client, u2.email, pwd2)
+    token2 = await login(client, u2.email, pwd2)
 
-    r = client.patch(
+    r = await client.patch(
         f"/channels/{channel1.id}",
         headers={"Authorization": f"Bearer {token2}"},
         json=EDIT_JSON_NOT_AUTHORIZED,
     )
     assert r.status_code == status.HTTP_404_NOT_FOUND
 
-    token1 = login(client, u1.email, pwd1)
+    token1 = await login(client, u1.email, pwd1)
 
     # Check unchanged
-    r = client.get(
+    r = await client.get(
         f"/channels/{channel1.id}",
         headers={"Authorization": f"Bearer {token1}"},
     )
@@ -311,7 +320,7 @@ def test_update_channel_ownership(client):
     assert data_before["port_url"] == channel1.port_url
 
     # Update
-    r = client.patch(
+    r = await client.patch(
         f"/channels/{channel1.id}",
         headers={"Authorization": f"Bearer {token1}"},
         json=EDIT_JSON_AUTHORIZED,
@@ -321,7 +330,7 @@ def test_update_channel_ownership(client):
     assert data_update["id"] == channel1.id
 
     # Check updated
-    r = client.get(
+    r = await client.get(
         f"/channels/{channel1.id}",
         headers={"Authorization": f"Bearer {token1}"},
     )
@@ -332,10 +341,11 @@ def test_update_channel_ownership(client):
     assert data_before["port_url"] == EDIT_JSON_AUTHORIZED["port_url"]
 
 
-def test_update_channel_admin(client):
-    u1, pwd1 = generate_user()
-    u_admin, pwd_admin = generate_user("admin")
-    channel1 = generate_an_email_channel(u1.id)
+@pytest.mark.anyio
+async def test_update_channel_admin(client):
+    u1, pwd1 = await generate_user()
+    u_admin, pwd_admin = await generate_user("admin")
+    channel1 = await generate_an_email_channel(u1.id)
     EDIT_JSON_AUTHORIZED = {
         "resource_url": "ok.com",
         "port_url": 1234,
@@ -343,10 +353,10 @@ def test_update_channel_admin(client):
     assert channel1.resource_url != EDIT_JSON_AUTHORIZED["resource_url"]
     assert channel1.port_url != EDIT_JSON_AUTHORIZED["port_url"]
 
-    token_admin = login(client, u_admin.email, pwd_admin)
+    token_admin = await login(client, u_admin.email, pwd_admin)
 
     # Update
-    r = client.patch(
+    r = await client.patch(
         f"/channels/{channel1.id}",
         headers={"Authorization": f"Bearer {token_admin}"},
         json=EDIT_JSON_AUTHORIZED,
@@ -355,9 +365,9 @@ def test_update_channel_admin(client):
     data_update = r.json()
     assert data_update["id"] == channel1.id
 
-    token1 = login(client, u1.email, pwd1)
+    token1 = await login(client, u1.email, pwd1)
     # Check updated
-    r = client.get(
+    r = await client.get(
         f"/channels/{channel1.id}",
         headers={"Authorization": f"Bearer {token1}"},
     )
@@ -373,20 +383,21 @@ def test_update_channel_admin(client):
 # ------------------ #
 
 
-def test_delete_channel(client):
-    user, pwd = generate_user()
-    channel = generate_an_email_channel(user.id)
+@pytest.mark.anyio
+async def test_delete_channel(client):
+    user, pwd = await generate_user()
+    channel = await generate_an_email_channel(user.id)
 
     # Not authenticated
-    r = client.delete(
+    r = await client.delete(
         f"/channels/{channel.id}",
     )
     assert r.status_code == status.HTTP_401_UNAUTHORIZED
 
-    token = login(client, user.email, pwd)
+    token = await login(client, user.email, pwd)
 
     # Check unchanged
-    r = client.get(
+    r = await client.get(
         f"/channels/{channel.id}",
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -395,38 +406,39 @@ def test_delete_channel(client):
     assert data_before["id"] == channel.id
 
     # Delete
-    r = client.delete(
+    r = await client.delete(
         f"/channels/{channel.id}",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert r.status_code == status.HTTP_204_NO_CONTENT
 
     # Check deleted
-    r = client.get(
+    r = await client.get(
         f"/channels/{channel.id}",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert r.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_delete_channel_ownership(client):
-    u1, pwd1 = generate_user()
-    u2, pwd2 = generate_user()
-    channel1 = generate_an_email_channel(u1.id)
+@pytest.mark.anyio
+async def test_delete_channel_ownership(client):
+    u1, pwd1 = await generate_user()
+    u2, pwd2 = await generate_user()
+    channel1 = await generate_an_email_channel(u1.id)
 
-    token2 = login(client, u2.email, pwd2)
+    token2 = await login(client, u2.email, pwd2)
 
     # Try delete
-    r = client.delete(
+    r = await client.delete(
         f"/channels/{channel1.id}",
         headers={"Authorization": f"Bearer {token2}"},
     )
     assert r.status_code == status.HTTP_404_NOT_FOUND
 
-    token1 = login(client, u1.email, pwd1)
+    token1 = await login(client, u1.email, pwd1)
 
     # Check unchanged
-    r = client.get(
+    r = await client.get(
         f"/channels/{channel1.id}",
         headers={"Authorization": f"Bearer {token1}"},
     )
@@ -435,38 +447,39 @@ def test_delete_channel_ownership(client):
     assert data_before["id"] == channel1.id
 
     # Delete
-    r = client.delete(
+    r = await client.delete(
         f"/channels/{channel1.id}",
         headers={"Authorization": f"Bearer {token1}"},
     )
     assert r.status_code == status.HTTP_204_NO_CONTENT
 
     # Check deleted
-    r = client.get(
+    r = await client.get(
         f"/channels/{channel1.id}",
         headers={"Authorization": f"Bearer {token1}"},
     )
     assert r.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_delete_channel_admin(client):
-    u1, pwd1 = generate_user()
-    u_admin, pwd_admin = generate_user("admin")
-    channel1 = generate_an_email_channel(u1.id)
+@pytest.mark.anyio
+async def test_delete_channel_admin(client):
+    u1, pwd1 = await generate_user()
+    u_admin, pwd_admin = await generate_user("admin")
+    channel1 = await generate_an_email_channel(u1.id)
 
-    token_admin = login(client, u_admin.email, pwd_admin)
+    token_admin = await login(client, u_admin.email, pwd_admin)
 
     # Try delete
-    r = client.delete(
+    r = await client.delete(
         f"/channels/{channel1.id}",
         headers={"Authorization": f"Bearer {token_admin}"},
     )
     assert r.status_code == status.HTTP_204_NO_CONTENT
 
-    token1 = login(client, u1.email, pwd1)
+    token1 = await login(client, u1.email, pwd1)
 
     # Check deleted
-    r = client.get(
+    r = await client.get(
         f"/channels/{channel1.id}",
         headers={"Authorization": f"Bearer {token1}"},
     )

@@ -1,21 +1,23 @@
 # CRUD operations
+import pytest
 from fastapi import status
 
-from db_data import generate_user
-from auth import login
+from tests.db_data import generate_user
+from tests.auth import login
 
 
-def test_create_user(client):
-    u_admin, pwd_admin = generate_user("admin")
+@pytest.mark.anyio
+async def test_create_user(client):
+    u_admin, pwd_admin = await generate_user("admin")
 
-    token = login(client, u_admin.email, pwd_admin)
-    r = client.get(
+    token = await login(client, u_admin.email, pwd_admin)
+    r = await client.get(
         "/users",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert r.status_code == status.HTTP_200_OK
 
-    r2 = client.post(
+    r2 = await client.post(
         "/users",
         headers={"Authorization": f"Bearer {token}"},
         json={
@@ -28,8 +30,8 @@ def test_create_user(client):
     assert r2.status_code == status.HTTP_201_CREATED
     data_login2 = r2.json()
 
-    token2 = login(client, "test@example.com", "test")
-    r3 = client.get(
+    token2 = await login(client, "test@example.com", "test")
+    r3 = await client.get(
         "/testAuth",
         headers={"Authorization": f"Bearer {token2}"},
     )
@@ -39,18 +41,19 @@ def test_create_user(client):
     assert "current_user_id" in data and data["current_user_id"] == data_login2["id"]
 
 
-def test_create_user_not_authorized(client):
+@pytest.mark.anyio
+async def test_create_user_not_authorized(client):
     # u_admin, pwd_admin = generate_user("admin")
-    u_basic, pwd_basic = generate_user("basic")
+    u_basic, pwd_basic = await generate_user("basic")
 
-    token = login(client, u_basic.email, pwd_basic)
-    r = client.get(
+    token = await login(client, u_basic.email, pwd_basic)
+    r = await client.get(
         "/users",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert r.status_code == status.HTTP_403_FORBIDDEN
 
-    r2 = client.post(
+    r2 = await client.post(
         "/users",
         headers={"Authorization": f"Bearer {token}"},
         json={
@@ -63,13 +66,14 @@ def test_create_user_not_authorized(client):
     assert r2.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_get_users(client):
-    u_admin, pwd_admin = generate_user("admin")
-    u_1, pwd_1 = generate_user()
-    u_2, pwd_2 = generate_user()
+@pytest.mark.anyio
+async def test_get_users(client):
+    u_admin, pwd_admin = await generate_user("admin")
+    u_1, pwd_1 = await generate_user()
+    u_2, pwd_2 = await generate_user()
 
-    token = login(client, u_admin.email, pwd_admin)
-    r = client.get(
+    token = await login(client, u_admin.email, pwd_admin)
+    r = await client.get(
         "/users",
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -82,51 +86,53 @@ def test_get_users(client):
     assert ids == ids_2
 
     # Unauthorized
-    token2 = login(client, u_1.email, pwd_1)
-    r = client.get(
+    token2 = await login(client, u_1.email, pwd_1)
+    r = await client.get(
         "/users",
         headers={"Authorization": f"Bearer {token2}"},
     )
     assert r.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_get_one_user(client):
-    u_admin, pwd_admin = generate_user("admin")
-    u_1, pwd_1 = generate_user()
-    u_2, pwd_2 = generate_user()
+@pytest.mark.anyio
+async def test_get_one_user(client):
+    u_admin, pwd_admin = await generate_user("admin")
+    u_1, pwd_1 = await generate_user()
+    u_2, pwd_2 = await generate_user()
 
-    token = login(client, u_admin.email, pwd_admin)
+    token = await login(client, u_admin.email, pwd_admin)
 
-    r = client.get(
+    r = await client.get(
         f"/users/{u_1.id}",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert r.status_code == status.HTTP_200_OK
 
-    r = client.get(
+    r = await client.get(
         "/user/9999",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert r.status_code == status.HTTP_404_NOT_FOUND
 
     # Unauthorized
-    token1 = login(client, u_1.email, pwd_1)
-    r = client.get(
+    token1 = await login(client, u_1.email, pwd_1)
+    r = await client.get(
         f"/users/{u_2.id}",
         headers={"Authorization": f"Bearer {token1}"},
     )
     assert r.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_update_user(client):
-    u_admin, pwd_admin = generate_user("admin")
-    u_1, pwd_1 = generate_user()
-    u_2, pwd_2 = generate_user()
+@pytest.mark.anyio
+async def test_update_user(client):
+    u_admin, pwd_admin = await generate_user("admin")
+    u_1, pwd_1 = await generate_user()
+    u_2, pwd_2 = await generate_user()
 
-    token = login(client, u_admin.email, pwd_admin)
+    token = await login(client, u_admin.email, pwd_admin)
 
     # Check initial data
-    r = client.get(
+    r = await client.get(
         f"/users/{u_1.id}",
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -137,7 +143,7 @@ def test_update_user(client):
 
     # Update
     EDITED_EMAIL = "user1@example.com"
-    r = client.patch(
+    r = await client.patch(
         f"/users/{u_1.id}",
         headers={"Authorization": f"Bearer {token}"},
         json={
@@ -147,7 +153,7 @@ def test_update_user(client):
     assert r.status_code == status.HTTP_200_OK
 
     # Check updated
-    r = client.get(
+    r = await client.get(
         f"/users/{u_1.id}",
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -158,8 +164,8 @@ def test_update_user(client):
     assert email_after == EDITED_EMAIL
 
     # Unauthorized
-    token1 = login(client, u_2.email, pwd_2)
-    r = client.patch(
+    token1 = await login(client, u_2.email, pwd_2)
+    r = await client.patch(
         f"/users/{u_1.id}",
         headers={"Authorization": f"Bearer {token1}"},
         json={
@@ -169,7 +175,7 @@ def test_update_user(client):
     assert r.status_code == status.HTTP_403_FORBIDDEN
 
     # Check unchanged with admin
-    r = client.get(
+    r = await client.get(
         f"/users/{u_1.id}",
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -178,45 +184,46 @@ def test_update_user(client):
     assert data["email"] == EDITED_EMAIL
 
 
-def test_delete_user(client):
-    u_admin, pwd_admin = generate_user("admin")
-    u_1, pwd_1 = generate_user()
-    u_2, pwd_2 = generate_user()
-    u_3, pwd_3 = generate_user()
+@pytest.mark.anyio
+async def test_delete_user(client):
+    u_admin, pwd_admin = await generate_user("admin")
+    u_1, pwd_1 = await generate_user()
+    u_2, pwd_2 = await generate_user()
+    u_3, pwd_3 = await generate_user()
 
-    token = login(client, u_admin.email, pwd_admin)
+    token = await login(client, u_admin.email, pwd_admin)
 
     # Check existence
-    r = client.get(
+    r = await client.get(
         f"/users/{u_3.id}",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert r.status_code == status.HTTP_200_OK
 
     # Delete
-    r = client.delete(
+    r = await client.delete(
         f"/users/{u_3.id}",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert r.status_code == status.HTTP_204_NO_CONTENT
 
     # Check deleted
-    r = client.get(
+    r = await client.get(
         f"/users/{u_3.id}",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert r.status_code == status.HTTP_404_NOT_FOUND
 
     # Unauthorized
-    token1 = login(client, u_1.email, pwd_1)
-    r = client.delete(
+    token1 = await login(client, u_1.email, pwd_1)
+    r = await client.delete(
         f"/users/{u_2.id}",
         headers={"Authorization": f"Bearer {token1}"},
     )
     assert r.status_code == status.HTTP_403_FORBIDDEN
 
     # Check unchanged with admin
-    r = client.get(
+    r = await client.get(
         f"/users/{u_2.id}",
         headers={"Authorization": f"Bearer {token}"},
     )

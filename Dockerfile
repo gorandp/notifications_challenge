@@ -3,8 +3,10 @@ FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS builder
 
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 
-# Omit development dependencies
-ENV UV_NO_DEV=1
+## Omit development dependencies
+# ENV UV_NO_DEV=1
+# NOTE: Now it is an arg to be defined by the docker compose file
+ARG UV_NO_DEV
 
 # Disable Python downloads, because we want to use the system interpreter
 # across both images. If using a managed Python version, it needs to be
@@ -45,10 +47,6 @@ USER nonroot
 
 # Use `/app` as the working directory
 WORKDIR /app
-
-# Make dir for data volume
-# (TODO: remove this if sqlite is no longer used)
-RUN mkdir -p /app/data
 
 # Place executables in the environment at the front of the path
 ENV PATH="/app/.venv/bin:$PATH"

@@ -1,5 +1,5 @@
 from contextvars import ContextVar
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import IDatabase
 from app.interface.user_repository import UserRepository
@@ -12,7 +12,7 @@ from app.interface.notification_service import NotificationService
 
 # ContextVar to handle session context safely
 database_ctx: ContextVar[IDatabase] = ContextVar("database")
-db_session: ContextVar[Session] = ContextVar("db_session")
+db_session: ContextVar[AsyncSession] = ContextVar("db_session")
 
 user_repository_ctx: ContextVar[UserRepository] = ContextVar("user_repository")
 user_service_ctx: ContextVar[UserService] = ContextVar("user_service")
@@ -45,7 +45,7 @@ def init_context(db: IDatabase):
     notification_service_ctx.set(n_serv)
 
 
-async def get_session() -> Session:
+async def get_session() -> AsyncSession:
     return db_session.get()
 
 

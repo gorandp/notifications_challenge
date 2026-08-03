@@ -4,20 +4,22 @@
 import pytest
 from fastapi import status
 
-from db_data import generate_user
-from auth import login
+from tests.db_data import generate_user
+from tests.auth import login
 
 from app.external.fastapi_app.routers.auth import EMAIL_REGEX
 
 
-def test_unauthenticated(client):
-    r = client.get("/testAuth")
+@pytest.mark.anyio
+async def test_unauthenticated(client):
+    r = await client.get("/testAuth")
     assert r.status_code == status.HTTP_401_UNAUTHORIZED
 
 
-def test_login(client):
-    u, pwd = generate_user()
-    r = client.post(
+@pytest.mark.anyio
+async def test_login(client):
+    u, pwd = await generate_user()
+    r = await client.post(
         "/token",
         data={
             "username": u.email,
@@ -26,7 +28,7 @@ def test_login(client):
     )
     assert r.status_code == status.HTTP_400_BAD_REQUEST
 
-    r = client.post(
+    r = await client.post(
         "/token",
         data={
             "username": u.email,
@@ -37,9 +39,10 @@ def test_login(client):
     assert "access_token" in r.json()
 
 
-def test_authenticated_endpoint(client):
-    u, pwd = generate_user()
-    r = client.post(
+@pytest.mark.anyio
+async def test_authenticated_endpoint(client):
+    u, pwd = await generate_user()
+    r = await client.post(
         "/token",
         data={
             "username": u.email,
@@ -49,7 +52,7 @@ def test_authenticated_endpoint(client):
     assert r.status_code == status.HTTP_200_OK
     assert "access_token" in r.json()
     token = r.json()["access_token"]
-    r = client.get(
+    r = await client.get(
         "/testAuth",
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -59,8 +62,9 @@ def test_authenticated_endpoint(client):
     assert "current_user_id" in data and data["current_user_id"] == u.id
 
 
-def test_register(client):
-    u, pwd = generate_user()
+@pytest.mark.anyio
+async def test_register(client):
+    u, pwd = await generate_user()
     NEW_USER = {
         "username": "test1234567890@example.com",
         "password": "password1234567890",
@@ -69,24 +73,27 @@ def test_register(client):
     assert pwd != NEW_USER["password"]
 
     # Test already existent user email
-    r = client.post("/register", json={"username": u.email, "password": "password"})
+    r = await client.post(
+        "/register", json={"username": u.email, "password": "password"}
+    )
     assert r.status_code == status.HTTP_400_BAD_REQUEST
 
     with pytest.raises(ValueError):
-        login(client, u.email, "password")
+        await login(client, u.email, "password")
 
-    token = login(client, u.email, pwd)
+    token = await login(client, u.email, pwd)
     assert isinstance(token, str)
 
     # Register
-    r = client.post("/register", json=NEW_USER)
+    r = await client.post("/register", json=NEW_USER)
     assert r.status_code == status.HTTP_201_CREATED
 
-    token_new = login(client, NEW_USER["username"], NEW_USER["password"])
+    token_new = await login(client, NEW_USER["username"], NEW_USER["password"])
     assert isinstance(token_new, str)
 
 
-def test_email_regex_for_register():
+@pytest.mark.anyio
+async def test_email_regex_for_register():
     valid_emails = [
         "john_smith@test.com",
         "john.smith@test.com",
