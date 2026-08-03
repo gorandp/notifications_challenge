@@ -3,10 +3,11 @@ FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS builder
 
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 
-## Omit development dependencies
+## Omit development dependencies (will not be installed by uv if equals to 1)
 # ENV UV_NO_DEV=1
 # NOTE: Now it is an arg to be defined by the docker compose file
-ARG UV_NO_DEV
+# defaults to 1 if not provided
+ARG UV_NO_DEV=1
 
 # Disable Python downloads, because we want to use the system interpreter
 # across both images. If using a managed Python version, it needs to be
@@ -15,16 +16,20 @@ ARG UV_NO_DEV
 ENV UV_PYTHON_DOWNLOADS=0
 
 WORKDIR /app
-RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --locked --no-install-project
-COPY . /app
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --locked
 
-# Add fastapi-cli
-RUN uv add fastapi-cli
+COPY pyproject.toml uv.lock ./
+RUN uv sync --locked --no-install-project
+COPY . ./
+RUN uv sync --locked
+
+## BuildKit-only usage (not compatible directly with gcloud)
+#RUN --mount=type=cache,target=/root/.cache/uv \
+#    --mount=type=bind,source=uv.lock,target=uv.lock \
+#    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+#    uv sync --locked --no-install-project
+#COPY . /app
+#RUN --mount=type=cache,target=/root/.cache/uv \
+#    uv sync --locked
 
 # Then, use a final image without uv
 FROM python:3.12-slim-bookworm
@@ -57,6 +62,8 @@ ENTRYPOINT []
 # Use the non-root user to run our application
 USER nonroot
 # Expose the FastAPI port
-EXPOSE 8000
+ENV PORT=8000
+EXPOSE $PORT
 # Run the FastAPI server
 # CMD ["fastapi", "run", "--host", "0.0.0.0", "src/main.py"]
+# CMD ["/bin/sh", "-c", "exec fastapi run --host 0.0.0.0 --port \"$PORT\" --proxy-headers --forwarded-allow-ips '*'"]
