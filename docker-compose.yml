@@ -26,12 +26,12 @@ services:
     environment:
       - JWT_SECRET=randomsecret12345678901234567890
       - DB_CONNECTION_STRING=postgresql+psycopg://notifuser:notifpass@postgres:5432/notifdb
-    # volumes:
-    #   - ./src:/app/src
-    #   - ./alembic:/app/alembic
-    #   # Mount other directories if needed, like static, templates, etc.
-    #   - ./src/static:/app/src/static
-    #   - ./src/templates:/app/src/templates
+    volumes:
+      - ./src:/app/src
+      - ./alembic:/app/alembic
+      # Mount other directories if needed, like static, templates, etc.
+      - ./src/static:/app/src/static
+      - ./src/templates:/app/src/templates
     ports:
       - "8000:8000"
 
