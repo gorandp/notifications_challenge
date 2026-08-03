@@ -1,7 +1,7 @@
 from dataclasses import asdict
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy import select, func, update, delete
+from sqlalchemy import select, func, update, delete, text
 
 from app.core.database import IDatabase
 from app.external.database import database_models as models
@@ -35,6 +35,10 @@ class Database(IDatabase):
             Session: SQL database session
         """
         return db_session.get()
+
+    async def test_connection(self):
+        session = await self.get_current_session()
+        await session.execute(text("SELECT 1"))
 
     async def create_user(self, user):
         session = await self.get_current_session()

@@ -7,6 +7,11 @@ from .channel import Channel
 
 class IDatabase(ABC):
     @abstractmethod
+    async def test_connection(self) -> None:
+        """Raise exception if connection can't be stablished"""
+        pass
+
+    @abstractmethod
     async def create_user(self, user: User) -> User:
         pass
 
