@@ -67,9 +67,5 @@ jobs:
       env:
         DB_CONNECTION_STRING: "postgresql+psycopg://notifuser_test:notifpass_test@localhost:5432/notifdb_test"
         JWT_SECRET: "randomsecret12345678901234567890"
-    # - name: Export Coverage XML results
-    #   run: |
-    #     coverage xml
     - name: Coverall
       uses: coverallsapp/github-action@v2
-      # file: coverage.xml
