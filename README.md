@@ -16,6 +16,7 @@ If you want to see the API reference, go to https://notif-api.gorandp.com/docs
 - Testing: Pytest
 - Architecture: Clean architecture
 - Database: PostgreSQL
+- Migrations: Alembic
 
 
 ## Features
@@ -31,7 +32,7 @@ If you want to see the API reference, go to https://notif-api.gorandp.com/docs
 
 - Docker installed without SUDO permission: https://www.docker.com/
 - Docker compose installed (usually installed along with Docker Desktop)
-- Port free: 8000
+- Ports free: 8000 (app), 5432 (postgres)
 
 ### Run
 
@@ -79,6 +80,22 @@ You can visit the API at http://localhost:8000/docs
 2. Create a `.env` file with the following variable
   - `DB_CONNECTION_STRING` url of the postgresql database (postgresql+psycopg://user_test:password_test@localhost/notifdb_test). It is suggested that the database name differs with the production database name.
 3. Run `uv run pytest`
+
+
+## Migrations
+
+While developing, schema changes may be needed. To reflect that in the database, it is used Alembic to generate the migrations which shows what to change in the database schema. And those migrations can be also run with alembic.
+
+As a prerequisite, it is needed to update the `.env` file with the database connection string.
+
+Scripts:
+
+- Generate new revision/migration: `uv run alembic revision --autogenerate -m "Message"`
+- Apply all migrations: `uv run alembic upgrade head`
+- Current migration state: `uv run alembic current`
+- Revisions history: `uv run alembic history`
+
+Notice that `uv` is used in every script, but if you have an environment without uv and all packages installed (like a production environment or a virtual envionment), you can run the exact same scripts removing `uv run` from them.
 
 
 ## Areas to improve
