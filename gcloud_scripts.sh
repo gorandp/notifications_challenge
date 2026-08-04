@@ -27,6 +27,8 @@
 ## and then to "variable & secrets"
 
 ## Add custom domain
+## Validate ownership first with https://search.google.com
+## Then
 # gcloud beta run domain-mappings create \
 #     --service=notif-challenge-service \
 #     --domain=notif-api.gorandp.com \
