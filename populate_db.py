@@ -188,7 +188,7 @@ NOTIFICATIONS = [
     {
         "c_reference": 3,
         "status": NotifStatus.SUCCESS,
-        "recipient": "+5491133001001",
+        "recipient": "54_9_1133001001",
         "title": "Verification code",
         "content": "Your verification code is 482913. It expires in 10 minutes.",
     },
@@ -209,7 +209,7 @@ NOTIFICATIONS = [
     {
         "c_reference": 6,
         "status": NotifStatus.SUCCESS,
-        "recipient": "+5491133001002",
+        "recipient": "54_9_1133001002",
         "title": "Delivery update",
         "content": "Your package is out for delivery and should arrive before the end of the day.",
     },
@@ -230,7 +230,7 @@ NOTIFICATIONS = [
     {
         "c_reference": 9,
         "status": NotifStatus.SUCCESS,
-        "recipient": "+5491133001003",
+        "recipient": "54_9_1133001003",
         "title": "Appointment confirmed",
         "content": "Your appointment has been confirmed for Thursday at 16:00.",
     },
@@ -251,7 +251,7 @@ NOTIFICATIONS = [
     {
         "c_reference": 3,
         "status": NotifStatus.SUCCESS,
-        "recipient": "+5491133001004",
+        "recipient": "54_9_1133001004",
         "title": "One-time password",
         "content": "Use code 715408 to continue signing in. This code is valid for 5 minutes.",
     },
@@ -286,7 +286,7 @@ NOTIFICATIONS = [
     {
         "c_reference": 3,
         "status": NotifStatus.SUCCESS,
-        "recipient": "+5491133001005",
+        "recipient": "54_9_1133001005",
         "title": "Login verification code",
         "content": "Use code 304761 to complete sign in. The code expires in 10 minutes.",
     },
@@ -307,7 +307,7 @@ NOTIFICATIONS = [
     {
         "c_reference": 6,
         "status": NotifStatus.ERROR,
-        "recipient": "+5491133001006",
+        "recipient": "54_9_1133001006",
         "title": "Pickup window reminder",
         "content": "Your pickup window starts in one hour. Please be ready with your confirmation number.",
     },
@@ -328,7 +328,7 @@ NOTIFICATIONS = [
     {
         "c_reference": 9,
         "status": NotifStatus.SUCCESS,
-        "recipient": "+5491133001007",
+        "recipient": "54_9_1133001007",
         "title": "Appointment reminder",
         "content": "This is a reminder for your appointment tomorrow at 11:30.",
     },
@@ -349,7 +349,7 @@ NOTIFICATIONS = [
     {
         "c_reference": 3,
         "status": NotifStatus.PENDING,
-        "recipient": "+5491133001008",
+        "recipient": "54_9_1133001008",
         "title": "Delivery confirmation code",
         "content": "Share code 918204 with the courier to confirm the delivery handoff.",
     },
@@ -370,7 +370,7 @@ NOTIFICATIONS = [
     {
         "c_reference": 9,
         "status": NotifStatus.SENDING,
-        "recipient": "+5491133001009",
+        "recipient": "54_9_1133001009",
         "title": "Verification call scheduled",
         "content": "Your verification call is scheduled for later today. Please keep your phone available.",
     },
