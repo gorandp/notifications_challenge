@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.exception_handlers import (
     http_exception_handler,
@@ -9,6 +9,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .routers import auth, users, notifications, channels, settings
+from .context import database_ctx
 
 # from app.external.database.database_models import Base as DatabaseBaseModel
 from app.core.logger import LoggerConfig
@@ -80,6 +81,19 @@ app.include_router(
 @app.get("/hello", tags=["Initial Test"])
 async def home():
     return {"msg": "Hello World!"}
+
+
+@app.get("/health", tags=["Health Check"])
+async def health():
+    db = database_ctx.get()
+    try:
+        await db.test_connection()
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database unavailable",
+        ) from exc
+    return {"status": "healthy"}
 
 
 @app.exception_handler(StarletteHTTPException)

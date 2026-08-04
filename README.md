@@ -12,10 +12,11 @@ and register a new account.
 If you want to see the API reference, go to https://notif-api.gorandp.com/docs
 
 - Backend: FastAPI
+- Host: Google Cloud Platform: Cloud Run + Cloud Build + Artifact Registry
 - Frontend: React ([repository](https://github.com/gorandp/notifications_challenge_front))
 - Testing: Pytest
 - Architecture: Clean architecture
-- Database: PostgreSQL
+- Database: PostgreSQL (hosted at [Neon](https://neon.com/))
 - Migrations: Alembic
 
 
