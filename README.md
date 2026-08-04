@@ -81,7 +81,7 @@ You can visit the API at http://localhost:8000/docs
 2. Create a `.env` file with the following variable
   - `DB_CONNECTION_STRING` url of the postgresql database (postgresql+psycopg://user_test:password_test@localhost/notifdb_test). It is suggested that the database name differs with the production database name.
 3. Run `uv run pytest`
-
+  - Or run `uv run coverage run -m pytest` and then `uv run coverage html` to get the coverage report
 
 ## Migrations
 
