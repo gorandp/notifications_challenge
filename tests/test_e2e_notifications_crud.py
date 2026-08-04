@@ -10,6 +10,7 @@ from tests.db_data import (
     generate_user,
     generate_notification,
     generate_an_email_channel,
+    generate_a_sms_channel,
 )
 from tests.auth import login
 
@@ -68,6 +69,79 @@ async def test_create_notification(client):
     assert isinstance(data_after, list)
     assert len(data_after) == 1
     assert data_after[0]["id"] == new_notif_id
+
+
+@pytest.mark.anyio
+async def test_notification_validation_on_creation(client):
+    user, pwd = await generate_user()
+    channel = await generate_an_email_channel(user.id)
+    JSON_BODY = {
+        "channel_id": channel.id,
+        "status": NotifStatus.PENDING.value,
+        "title": "Test Notification",
+        "content": "Test Content",
+        "recipient": "recipient@example.com",
+        "send_after_creating": False,
+    }
+    token = await login(client, user.email, pwd)
+
+    # Long title
+    r = await client.post(
+        "/notifications",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            **JSON_BODY,
+            "title": "-" * 1000,
+        },
+    )
+    assert r.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT  # limited by schema
+
+    # Long recipient
+    r = await client.post(
+        "/notifications",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            **JSON_BODY,
+            "recipient": "s" * 500 + "@s.com",
+        },
+    )
+    assert r.status_code == status.HTTP_400_BAD_REQUEST
+    assert r.text.find("Recipient lenght") >= 0
+
+    # Wrong recipient format
+    r = await client.post(
+        "/notifications",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            **JSON_BODY,
+            "recipient": "-" * 50,
+        },
+    )
+    assert r.status_code == status.HTTP_400_BAD_REQUEST
+    assert r.text.find("Recipient email format") >= 0
+
+
+@pytest.mark.anyio
+async def test_create_notification_with_non_existent_channel(client):
+    user, pwd = await generate_user()
+    # channel = await generate_an_email_channel(user.id)
+    JSON_BODY = {
+        "channel_id": 5,
+        "status": NotifStatus.PENDING.value,
+        "title": "Test Notification",
+        "content": "Test Content",
+        "recipient": "recipient@example.com",
+        "send_after_creating": False,
+    }
+    token = await login(client, user.email, pwd)
+
+    r = await client.post(
+        "/notifications",
+        headers={"Authorization": f"Bearer {token}"},
+        json=JSON_BODY,
+    )
+    assert r.status_code == status.HTTP_404_NOT_FOUND
+    assert r.text.find("Channel not found") >= 0
 
 
 # ------------------ #
@@ -380,6 +454,73 @@ async def test_update_notification_ownership(client):
     assert data_after["id"] == notification.id
     assert data_after["title"] == EDIT_JSON_AUTHORIZED["title"]
     assert data_after["content"] == EDIT_JSON_AUTHORIZED["content"]
+
+
+@pytest.mark.anyio
+async def test_update_notification_channel(client):
+    user, pwd = await generate_user()
+    channel = await generate_an_email_channel(user.id)
+    channel2 = await generate_an_email_channel(user.id)
+    channel3 = await generate_a_sms_channel(user.id)
+    notification = await generate_notification(
+        user.id,
+        channel.id,
+        channel.type,
+    )
+    token = await login(client, user.email, pwd)
+
+    # Change to another same channel type
+    r = await client.patch(
+        f"/notifications/{notification.id}",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"channel_id": channel2.id},
+    )
+    assert r.status_code == status.HTTP_200_OK
+    data_update = r.json()
+    assert data_update["id"] == notification.id
+
+    # Check updated
+    r = await client.get(
+        f"/notifications/{notification.id}",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert r.status_code == status.HTTP_200_OK
+    data_after = r.json()
+    assert data_after["id"] == notification.id
+    assert data_after["channel_id"] == channel2.id
+
+    # Change to another channel type
+    r = await client.patch(
+        f"/notifications/{notification.id}",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"channel_id": channel3.id},
+    )
+    assert r.status_code == status.HTTP_400_BAD_REQUEST
+    assert data_update["id"] == notification.id
+    assert r.text.find("Recipient must have a valid phone number") >= 0
+
+    # Change to another channel type with proper values
+    r = await client.patch(
+        f"/notifications/{notification.id}",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "recipient": "54_9_1234567890",
+            "channel_id": channel3.id,
+        },
+    )
+    assert r.status_code == status.HTTP_200_OK
+    data_update = r.json()
+    assert data_update["id"] == notification.id
+
+    # Check updated
+    r = await client.get(
+        f"/notifications/{notification.id}",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert r.status_code == status.HTTP_200_OK
+    data_after = r.json()
+    assert data_after["id"] == notification.id
+    assert data_after["channel_id"] == channel3.id
 
 
 @pytest.mark.anyio
