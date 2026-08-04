@@ -61,7 +61,6 @@ docker compose down
 ### Pre-requisites
 
 - uv: https://docs.astral.sh/uv/getting-started/installation/#standalone-installer
-- (optional) nvm (to install Wrangler via npm): https://github.com/nvm-sh/nvm#installing-and-updating
 - Port free: 8000
 - PostgreSQL installed
 
