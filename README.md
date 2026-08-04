@@ -110,6 +110,7 @@ uv run populate_db.py
 ## Areas to improve
 
 - Select queries should get only the fields that are needed for each request to be more efficient in data transfers
+- More providers may be added to SMS and Push channels
 
 
 ## Techs

@@ -1,4 +1,5 @@
 import re
+import httpx
 
 from app.core.channel import ChannelType
 from app.core.channel_strategy import IChannelStrategy
@@ -20,7 +21,30 @@ class SmsChannel(IChannelStrategy):
         pass
 
     async def send(self, notification):
-        pass
+        if self.channel.resource_url == "api.onesignal.com":
+            # https://documentation.onesignal.com/reference/sms
+            content = notification.content
+            if notification.title:
+                content = notification.title + "\n\n" + notification.content
+            await httpx.post(
+                self.channel.resource_url,
+                headers={
+                    "Authorization": f"Key {self.channel.credential_pass}",
+                },
+                json={
+                    "app_id": self.channel.credential_user,
+                    "contents": {
+                        "en": content,
+                        "es": content,
+                    },
+                    "target_channel": "sms",
+                    "include_phone_numbers": [
+                        notification.recipient,
+                    ],
+                },
+            )
+        else:
+            raise NotImplementedError("Provider not implemented yet")
 
     @classmethod
     def validate_notification(cls, notification):
