@@ -1,5 +1,5 @@
 [![test-status-image]][test-status]
-[![Coverage Status](https://coveralls.io/repos/github/gorandp/notifications_challenge/badge.svg?branch=coverall)](https://coveralls.io/github/gorandp/notifications_challenge?branch=coverall)
+[![Coverage Status](https://coveralls.io/repos/github/gorandp/notifications_challenge/badge.svg?branch=main)](https://coveralls.io/github/gorandp/notifications_challenge?branch=main)
 
 # Notifications Challenge
 
