@@ -99,9 +99,17 @@ Scripts:
 Notice that `uv` is used in every script, but if you have an environment without uv and all packages installed (like a production environment or a virtual envionment), you can run the exact same scripts removing `uv run` from them.
 
 
+## Seeder
+
+If you want to get an already working app with data, you can seed your DB running the following script (setting DB_CONNECTION_STRING beforehand):
+
+```sh
+uv run populate_db.py
+```
+
+
 ## Areas to improve
 
-- Seed migration could be added to get running an already working app with data
 - Select queries should get only the fields that are needed for each request to be more efficient in data transfers
 
 
